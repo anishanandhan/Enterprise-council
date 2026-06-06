@@ -1,0 +1,31 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "venv/**",
+      "datasets/**",
+      "agents/**",
+      "api/**",
+      "frontend/**",
+      "mcp/**",
+      "orchestrator/**",
+      "services/**",
+      "simulation/**",
+      "splunk/**",
+      "twin/**",
+      "requirements.txt",
+      "*.png",
+      "*.md",
+      "LICENSE"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

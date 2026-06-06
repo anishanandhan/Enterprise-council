@@ -1,0 +1,45 @@
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Credentials & Environment files
+.env
+.env.*
+!.env.example
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE/Editor config
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific logs or generated assets
+*.log
+
+# Firebase Cache
+.firebase/
+
+# Backup files
+*.original
+
+# Test files
+test_*.png
+architecture_diagram.png
+

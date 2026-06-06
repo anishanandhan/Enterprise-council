@@ -1,0 +1,13 @@
+networkx
+pandas
+matplotlib
+streamlit
+google-genai
+splunk-sdk
+requests
+plotly
+fastapi
+uvicorn
+pydantic
+fpdf2
+
