@@ -1,0 +1,45 @@
+timestamp,user,device,event,severity
+2026-06-01 09:00,John,MacBook-Pro-01,VPN Login,Low
+2026-06-01 09:15,John,MacBook-Pro-01,Large Data Download,High
+2026-06-01 09:20,John,MacBook-Pro-01,Privilege Escalation,Critical
+2026-06-01 09:27,John,MacBook-Pro-01,Sensitive File Copy,Critical
+2026-06-01 08:00,Alice,Lenovo-ThinkPad-02,VPN Login,Low
+2026-06-01 08:15,Bob,MacBook-Air-05,Successful Login,Low
+2026-06-01 08:30,David,Win-Desktop-11,VPN Login Failure,Medium
+2026-06-01 08:45,Sarah,MacBook-Pro-03,Password Change,Medium
+2026-06-01 09:00,Kevin,Lenovo-ThinkPad-02,File Download,Low
+2026-06-01 09:15,Emily,MacBook-Air-05,Sensitive File Copy,Critical
+2026-06-01 09:30,Michael,Win-Desktop-11,Policy Violation,High
+2026-06-01 09:45,James,MacBook-Pro-03,VPN Login,Low
+2026-06-01 10:00,Alice,Lenovo-ThinkPad-02,Successful Login,Low
+2026-06-01 10:15,Bob,MacBook-Air-05,VPN Login Failure,Medium
+2026-06-01 10:30,David,Win-Desktop-11,Password Change,Medium
+2026-06-01 10:45,Sarah,MacBook-Pro-03,File Download,Low
+2026-06-01 11:00,Kevin,Lenovo-ThinkPad-02,Sensitive File Copy,High
+2026-06-01 11:15,Emily,MacBook-Air-05,Policy Violation,Critical
+2026-06-01 11:30,Michael,Win-Desktop-11,VPN Login,Low
+2026-06-01 11:45,James,MacBook-Pro-03,Successful Login,Low
+2026-06-01 12:00,Alice,Lenovo-ThinkPad-02,VPN Login Failure,Medium
+2026-06-01 12:15,Bob,MacBook-Air-05,Password Change,Medium
+2026-06-01 12:30,David,Win-Desktop-11,File Download,Low
+2026-06-01 12:45,Sarah,MacBook-Pro-03,Sensitive File Copy,Critical
+2026-06-01 13:00,Kevin,Lenovo-ThinkPad-02,Policy Violation,High
+2026-06-01 13:15,Emily,MacBook-Air-05,VPN Login,Low
+2026-06-01 13:30,Michael,Win-Desktop-11,Successful Login,Low
+2026-06-01 13:45,James,MacBook-Pro-03,VPN Login Failure,Medium
+2026-06-01 14:00,Alice,Lenovo-ThinkPad-02,Password Change,Medium
+2026-06-01 14:15,Bob,MacBook-Air-05,File Download,Low
+2026-06-01 14:30,David,Win-Desktop-11,Sensitive File Copy,High
+2026-06-01 14:45,Sarah,MacBook-Pro-03,Policy Violation,Critical
+2026-06-01 15:00,Kevin,Lenovo-ThinkPad-02,VPN Login,Low
+2026-06-01 15:15,Emily,MacBook-Air-05,Successful Login,Low
+2026-06-01 15:30,Michael,Win-Desktop-11,VPN Login Failure,Medium
+2026-06-01 15:45,James,MacBook-Pro-03,Password Change,Medium
+2026-06-01 16:00,Alice,Lenovo-ThinkPad-02,File Download,Low
+2026-06-01 16:15,Bob,MacBook-Air-05,Sensitive File Copy,Critical
+2026-06-01 16:30,David,Win-Desktop-11,Policy Violation,High
+2026-06-01 16:45,Sarah,MacBook-Pro-03,VPN Login,Low
+2026-06-01 17:00,Kevin,Lenovo-ThinkPad-02,Successful Login,Low
+2026-06-01 17:15,Emily,MacBook-Air-05,VPN Login Failure,Medium
+2026-06-01 17:30,Michael,Win-Desktop-11,Password Change,Medium
+2026-06-01 17:45,James,MacBook-Pro-03,File Download,Low

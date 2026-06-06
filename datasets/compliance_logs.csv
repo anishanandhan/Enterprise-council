@@ -1,0 +1,39 @@
+timestamp,event,policy,risk
+2026-06-01 09:15,Large Data Download,GDPR,High
+2026-06-01 09:20,Privilege Escalation,Access Control,Critical
+2026-06-01 09:27,Sensitive File Copy,Data Retention,Critical
+2026-06-01 08:00,Large Data Download,GDPR,High
+2026-06-01 08:20,Privilege Escalation,Access Control,High
+2026-06-01 08:40,Sensitive File Copy,Data Retention,Critical
+2026-06-01 09:00,VPN Login Failure,HIPAA,Low
+2026-06-01 09:20,Unauthorized Access Attempt,SOC2,Critical
+2026-06-01 09:40,Data Transfer Outbound,PCI-DSS,Medium
+2026-06-01 10:00,Large Data Download,Acceptable Use Policy,High
+2026-06-01 10:20,Privilege Escalation,GDPR,High
+2026-06-01 10:40,Sensitive File Copy,Access Control,Critical
+2026-06-01 11:00,VPN Login Failure,Data Retention,Low
+2026-06-01 11:20,Unauthorized Access Attempt,HIPAA,Critical
+2026-06-01 11:40,Data Transfer Outbound,SOC2,Medium
+2026-06-01 12:00,Large Data Download,PCI-DSS,High
+2026-06-01 12:20,Privilege Escalation,Acceptable Use Policy,High
+2026-06-01 12:40,Sensitive File Copy,GDPR,Critical
+2026-06-01 13:00,VPN Login Failure,Access Control,Low
+2026-06-01 13:20,Unauthorized Access Attempt,Data Retention,Critical
+2026-06-01 13:40,Data Transfer Outbound,HIPAA,Medium
+2026-06-01 14:00,Large Data Download,SOC2,High
+2026-06-01 14:20,Privilege Escalation,PCI-DSS,High
+2026-06-01 14:40,Sensitive File Copy,Acceptable Use Policy,Critical
+2026-06-01 15:00,VPN Login Failure,GDPR,Low
+2026-06-01 15:20,Unauthorized Access Attempt,Access Control,Critical
+2026-06-01 15:40,Data Transfer Outbound,Data Retention,Medium
+2026-06-01 16:00,Large Data Download,HIPAA,High
+2026-06-01 16:20,Privilege Escalation,SOC2,High
+2026-06-01 16:40,Sensitive File Copy,PCI-DSS,Critical
+2026-06-01 17:00,VPN Login Failure,Acceptable Use Policy,Low
+2026-06-01 17:20,Unauthorized Access Attempt,GDPR,Critical
+2026-06-01 17:40,Data Transfer Outbound,Access Control,Medium
+2026-06-01 18:00,Large Data Download,Data Retention,High
+2026-06-01 18:20,Privilege Escalation,HIPAA,High
+2026-06-01 18:40,Sensitive File Copy,SOC2,Critical
+2026-06-01 19:00,VPN Login Failure,PCI-DSS,Low
+2026-06-01 19:20,Unauthorized Access Attempt,Acceptable Use Policy,Critical

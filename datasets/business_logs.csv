@@ -1,0 +1,12 @@
+timestamp,user,role,department,criticality
+2026-06-01 09:00,John,Lead DevOps Engineer,Engineering,Very High
+2026-06-01 09:00,Alice,Product Manager,Operations,Medium
+2026-06-01 09:00,Bob,Security Analyst,Security,High
+2026-06-01 08:00,David,Database Administrator,Engineering,High
+2026-06-01 09:00,Sarah,VP Finance,Finance,Critical
+2026-06-01 10:00,Kevin,HR Director,HR,Medium
+2026-06-01 11:00,Emily,Customer Support Lead,Support,Low
+2026-06-01 12:00,Michael,Sales Executive,Sales,Low
+2026-06-01 13:00,James,General Counsel,Legal,High
+2026-06-01 14:00,Jessica,Chief Information Security Officer,Security,Critical
+2026-06-01 15:00,Ryan,Infrastructure Engineer,Engineering,High
