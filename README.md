@@ -1,6 +1,8 @@
 # Enterprise Council AI
 A multi-agent decision intelligence console translating Splunk security telemetry into consensus risk evaluations.
 
+![Landing Page](docs/landing_page.png)
+
 [![License](https://img.shields.io/github/license/anishanandhan/Enterprise-council?style=flat-square&color=emerald)](LICENSE)
 [![Streamlit App](https://img.shields.io/badge/Streamlit-App-red?style=flat-square&logo=streamlit)](https://enterprise-council-ai.web.app)
 [![FastAPI Docs](https://img.shields.io/badge/FastAPI-Docs-blue?style=flat-square&logo=fastapi)](http://localhost:8001/docs)
@@ -76,6 +78,9 @@ Enterprise Council AI is a decision intelligence system built to resolve critica
 ---
 
 ## Architecture
+
+![Architecture Diagram](docs/architecture_diagram.png)
+
 ```
 Splunk Enterprise
        │
@@ -223,7 +228,7 @@ GEMINI_API_KEY=your_gemini_api_key
   ```bash
   python3 -m http.server 8080
   ```
-* Start the Streamlit Command Center:
+* Start the Operational Command Center (Streamlit):
   ```bash
   streamlit run frontend/app.py
   ```
@@ -234,6 +239,10 @@ GEMINI_API_KEY=your_gemini_api_key
 3. Select one of the pre-filled demo identities (CISO, SOC Analyst, SOC Manager, or Auditor) to authenticate your access scope.
 4. Go to the dashboard and customize user names, incident alerts, and severity levels in the Scenario configuration.
 5. Click Run Full Pipeline to monitor the real-time agent deliberations.
+
+![Authentication Gateway](docs/auth_gateway.png)
+
+![Operational Command Center](docs/dashboard_layout.png)
 
 ---
 
