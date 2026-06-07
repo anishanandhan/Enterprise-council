@@ -561,7 +561,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ── Helper Functions ─────────────────────────────────────────────
+# ── Helper Functions (logs cleaned) ─────────────────────────────────────────────
 
 def check_execution_permission(rbac_role, decision_action):
     """Determine if user has the authority to execute response playbook based on active role."""
