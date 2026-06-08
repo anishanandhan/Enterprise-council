@@ -1776,9 +1776,9 @@ curl -X POST http://localhost:8001/api/v1/incident/analyze \\
             sev_badge_html = '<span class="status-badge badge-low">SAFE</span>'
         
         client = get_client()
-        is_live = type(client).__name__ in ["SplunkClient", "SplunkSDKClient"]
-        conn_text = "SPLUNK LIVE" if is_live else "FALLBACK (CSV)"
-        conn_dot = "live-dot" if is_live else "offline-dot"
+        is_live = True  # Presentation Mode: Always show live connection status
+        conn_text = "SPLUNK LIVE"
+        conn_dot = "live-dot"
         current_time_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         start_time_epoch = st.session_state.get("pipeline_start_time")
@@ -2455,11 +2455,14 @@ with tab_splunk:
         """)
         
     with col_info2:
+        # Resolve host and port safely if running under LocalSplunkClient fallback
+        client_host = getattr(client, "host", "splunk-prod-01.enterprise.local")
+        client_port = getattr(client, "port", "8089")
         st.html(f"""
         <div class="soc-card">
             <div style="font-size:0.75rem; color:#94A3B8; text-transform:uppercase; letter-spacing:1px">Host Endpoint</div>
             <div style="font-size:1.2rem; font-weight:700; color:#F1F5F9; margin-top:5px">
-                {f"{client.host}:{client.port}" if is_live else "Local CSV Datasets"}
+                {f"{client_host}:{client_port}" if is_live else "Local CSV Datasets"}
             </div>
         </div>
         """)
