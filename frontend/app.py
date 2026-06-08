@@ -299,13 +299,21 @@ if not st.session_state["show_dashboard"]:
         </style>
         """, unsafe_allow_html=True)
         
+        import platform
+        is_cloud = platform.system() != "Darwin"
+
         try:
             port = st.config.get_option("server.port") or 8502
         except Exception:
             port = 8502
-            
+
+        if is_cloud:
+            landing_url = "https://enterprise-council-ai.web.app/?streamlit_origin=https://enterprise-council-ai.streamlit.app"
+        else:
+            landing_url = f"http://localhost:8080/?streamlit_origin=http://localhost:{port}"
+
         # Load landing page via native st.iframe with dynamic origin parameter
-        st.iframe(f"http://localhost:8080/?streamlit_origin=http://localhost:{port}", height=1000)
+        st.iframe(landing_url, height=1000)
         st.stop()
 
 # Initialize model usage counters and timestamps
