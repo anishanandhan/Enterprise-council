@@ -233,7 +233,7 @@
                     setLoading(false);
                 }, 1000);
 
-                let parentOrigin = "http://localhost:8502";
+                let parentOrigin = window.location.hostname === "127.0.0.1" ? "http://127.0.0.1:8502" : "http://localhost:8502";
                 const urlParams = new URLSearchParams(window.location.search);
                 const queryOrigin = urlParams.get("streamlit_origin");
                 if (queryOrigin) {
@@ -242,7 +242,7 @@
                     try {
                         parentOrigin = new URL(document.referrer).origin;
                     } catch (_) {}
-                } else if (window.location.origin && window.location.origin.includes("localhost") && !window.location.origin.includes("8080")) {
+                } else if (window.location.origin && (window.location.origin.includes("localhost") || window.location.origin.includes("127.0.0.1")) && !window.location.origin.includes("8080")) {
                     parentOrigin = window.location.origin;
                 }
                 setDashboardUrl(parentOrigin + "/?page=auth");
