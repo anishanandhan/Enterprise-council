@@ -4,7 +4,7 @@ A multi-agent decision intelligence console translating Splunk security telemetr
 ![Landing Page](docs/landing_page.png)
 
 [![License](https://img.shields.io/github/license/anishanandhan/Enterprise-council?style=flat-square&color=emerald)](LICENSE)
-# ⚠️ WAIT FOR 10 SECONDS AFTER CLICKING THE LINK ⚠️
+# ⚠️ WAIT FOR 10 SECONDS AFTER CLICKING THE LINK 
 
 ## 🚀 LIVE DEMO: [https://enterprise-council-ai.streamlit.app/](https://enterprise-council-ai.streamlit.app/)
 
