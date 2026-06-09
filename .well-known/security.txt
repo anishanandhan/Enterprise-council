@@ -1,0 +1,8 @@
+# Security Contact Information (RFC 9116)
+# https://securitytxt.org/
+
+Contact: mailto:security@council.ai
+Expires: 2027-06-09T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://enterprise-council-ai.web.app/.well-known/security.txt
+Policy: https://github.com/anishanandhan/Enterprise-council/blob/main/SECURITY.md

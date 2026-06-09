@@ -318,12 +318,22 @@
 
             return (
                 <div className="bg-hero-bg min-h-screen text-foreground font-sans">
+                    <a 
+                        href="#main-content" 
+                        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-sm font-bold z-[100] outline-none ring-2 ring-primary"
+                        aria-label="Skip to main content"
+                    >
+                        Skip to Content
+                    </a>
                     
                     {/* ── Floating Navbars ── */}
                     {showSentinelNavbar ? (
                         /* Sentinel Floating Pill Navbar */
-                        <nav className="fixed top-4 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-5xl z-50 flex flex-row justify-between items-center px-6 md:px-8 py-3.5 bg-[#0A0E1A]/80 backdrop-blur-lg border border-white/10 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-fade-in">
-                            <a href="#hero" className="text-foreground text-xs font-bold tracking-widest uppercase flex items-center gap-2">
+                        <nav 
+                            className="fixed top-4 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-5xl z-50 flex flex-row justify-between items-center px-6 md:px-8 py-3.5 bg-[#0A0E1A]/80 backdrop-blur-lg border border-white/10 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-fade-in"
+                            aria-label="Sentinel floating navigation"
+                        >
+                            <a href="#hero" className="text-foreground text-xs font-bold tracking-widest uppercase flex items-center gap-2" aria-label="Enterprise Council AI Homepage">
                                 <Shield className="text-primary w-4.5 h-4.5" /> Enterprise Council AI
                             </a>
                             <div className="hidden lg:flex gap-6 items-center">
@@ -332,6 +342,7 @@
                                         key={link} 
                                         href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
                                         className="text-[10px] text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest"
+                                        aria-label={`Jump to ${link} section`}
                                     >
                                         {link}
                                     </a>
@@ -341,6 +352,7 @@
                                     href="http://localhost:8001/docs" 
                                     target="_blank"
                                     className="text-[10px] text-primary hover:text-foreground transition-colors uppercase tracking-widest font-semibold"
+                                    aria-label="Open API Documentation in a new tab"
                                 >
                                     API Docs
                                 </a>
@@ -349,13 +361,17 @@
                                 href={dashboardUrl} 
                                 target={linkTarget}
                                 className="hidden lg:inline-flex items-center justify-center rounded-full uppercase text-[10px] tracking-widest px-5 py-2 font-semibold text-foreground bg-nav-button hover:bg-nav-button/80 active:scale-[0.97] transition-all border border-white/5"
+                                aria-label="Console Login (opens decision center dashboard)"
                             >
                                 Console Login
                             </a>
                         </nav>
                     ) : (
                         /* Mainframe Fixed Navbar (Branded Enterprise Council AI) */
-                        <header className="fixed top-0 inset-x-0 z-50 px-5 sm:px-8 py-4 sm:py-5 flex flex-row justify-between items-center bg-white/80 backdrop-blur-md border-b border-neutral-100 animate-fade-in text-black">
+                        <header 
+                            className="fixed top-0 inset-x-0 z-50 px-5 sm:px-8 py-4 sm:py-5 flex flex-row justify-between items-center bg-white/80 backdrop-blur-md border-b border-neutral-100 animate-fade-in text-black"
+                            aria-label="Mainframe site header"
+                        >
                             <div className="flex flex-row items-center gap-2">
                                 <Shield className="text-emerald-600 w-5 h-5" />
                                 <span className="text-[18px] sm:text-[22px] tracking-tight text-black font-semibold select-none">
@@ -367,7 +383,12 @@
                             {/* Desktop Nav Links */}
                             <div className="hidden lg:flex flex-row items-center text-[18px] text-neutral-600 gap-6">
                                 {["Problem", "Solution", "How It Works", "Metrics"].map((link) => (
-                                    <a key={link} href={`#${link.toLowerCase().replace(/\s+/g, "-")}`} className="hover:text-black transition-colors font-medium">
+                                    <a 
+                                        key={link} 
+                                        href={`#${link.toLowerCase().replace(/\s+/g, "-")}`} 
+                                        className="hover:text-black transition-colors font-medium"
+                                        aria-label={`Jump to ${link} section`}
+                                    >
                                         {link}
                                     </a>
                                 ))}
@@ -379,6 +400,7 @@
                                     href="http://localhost:8001/docs" 
                                     target="_blank" 
                                     className="hover:opacity-60 transition-opacity underline underline-offset-2"
+                                    aria-label="Open API Documentation in a new tab"
                                 >
                                     API Docs
                                 </a>
@@ -386,6 +408,7 @@
                                     href={dashboardUrl} 
                                     target={linkTarget} 
                                     className="hover:opacity-60 transition-opacity underline underline-offset-2 font-semibold text-emerald-700"
+                                    aria-label="Console Login (opens decision center dashboard)"
                                 >
                                     Console Login
                                 </a>
@@ -396,6 +419,8 @@
                             <button 
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                                 className="flex lg:hidden flex-col gap-[5px] justify-center items-center w-8 h-8 pointer-events-auto z-50 text-black"
+                                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                                aria-expanded={isMobileMenuOpen}
                             >
                                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                             </button>
@@ -408,6 +433,7 @@
                                         href={`#${link.toLowerCase().replace(/\s+/g, "-")}`} 
                                         onClick={() => setIsMobileMenuOpen(false)}
                                         className="text-2xl text-black font-medium hover:opacity-60 transition-opacity"
+                                        aria-label={`Jump to ${link} section`}
                                     >
                                         {link}
                                     </a>
@@ -418,6 +444,7 @@
                                     target={linkTarget}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className="text-xl text-emerald-700 font-semibold underline underline-offset-4"
+                                    aria-label="Console Login (opens decision center dashboard)"
                                 >
                                     Console Login
                                 </a>
@@ -426,12 +453,15 @@
                                     target="_blank"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className="text-xl text-emerald-700 font-semibold underline underline-offset-4"
+                                    aria-label="Open API Documentation in a new tab"
                                 >
                                     API Docs
                                 </a>
                             </div>
                         </header>
                     )}
+
+                    <main id="main-content" className="outline-none" tabIndex={-1}>
 
                     {/* ── Section 1: Sentinel-style Spline Hero ── */}
                     <section id="hero" className="relative h-[850px] flex items-center bg-hero-bg overflow-hidden">
@@ -644,7 +674,7 @@
 
                         {/* Interactive Content Layout Overlay */}
                         <div className="relative z-10 flex flex-col order-first lg:order-none w-full bg-white lg:bg-transparent pb-8 lg:pb-0 lg:h-[800px]">
-                            <main className="w-full max-w-7xl mx-auto px-6 py-24 flex-1 flex flex-col justify-center">
+                            <div className="w-full max-w-7xl mx-auto px-6 py-24 flex-1 flex flex-col justify-center">
                                 
                                 {/* Typewriter Headline */}
                                 <motion.div 
@@ -653,14 +683,14 @@
                                     transition={{ duration: 0.6 }}
                                     className="w-full"
                                 >
-                                    <h1 className="text-5xl md:text-6xl lg:text-[76px] font-normal tracking-tight text-black leading-[1.08] mb-8 select-none w-full whitespace-pre-wrap">
+                                    <h2 className="text-5xl md:text-6xl lg:text-[76px] font-normal tracking-tight text-black leading-[1.08] mb-8 select-none w-full whitespace-pre-wrap">
                                         {typewriter.displayed}
                                         {!typewriter.done && (
                                             <span className="inline-block w-[2px] h-[1.1em] bg-black align-middle ml-[2px] animate-blink" />
                                         )}
-                                    </h1>
+                                    </h2>
                                 </motion.div>
-
+ 
                                 {/* Secondary Description Text */}
                                 <motion.div 
                                     initial={{ opacity: 0, y: 20 }}
@@ -671,16 +701,16 @@
                                         Test our AI security council deliberation dynamics. Select the specialized agents below to configure the council session in the live environment.
                                     </p>
                                 </motion.div>
-
+ 
                                 {/* Interactive Multi-Select Service Pills */}
                                 <div className="max-w-2xl">
-                                    <h2 className="text-2xl font-medium tracking-tight mb-2 text-black">
+                                    <h3 className="text-2xl font-medium tracking-tight mb-2 text-black">
                                         Which agents should deliberate?
-                                    </h2>
+                                    </h3>
                                     <p className="opacity-85 text-[#738273] mb-8 text-sm">
                                         Select specialized domains to test
                                     </p>
-
+ 
                                     <div className="flex flex-wrap gap-3 mb-10">
                                         {["Security", "Compliance", "Infrastructure", "Business"].map((agent) => {
                                             const isActive = selectedAgents.includes(agent);
@@ -694,15 +724,17 @@
                                                             ? "bg-[#1C2E1E] text-white shadow-md shadow-emerald-950/5 transform" 
                                                             : "bg-white text-[#1C2E1E] border border-[#F1F3F1] hover:bg-[#F1F3F1]/55"
                                                     }`}
+                                                    aria-label={`Toggle ${agent} Agent`}
+                                                    aria-pressed={isActive}
                                                 >
                                                     <AnimatePresence initial={false}>
                                                         {isActive && (
                                                             <motion.span
-                                                                initial={{ scale: 0, width: 0 }}
-                                                                animate={{ scale: 1, width: "auto" }}
-                                                                exit={{ scale: 0, width: 0 }}
-                                                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                                                className="flex items-center"
+                                                                 initial={{ scale: 0, width: 0 }}
+                                                                 animate={{ scale: 1, width: "auto" }}
+                                                                 exit={{ scale: 0, width: 0 }}
+                                                                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                                                 className="flex items-center"
                                                             >
                                                                 <Check size={14} className="stroke-white stroke-[3px]" />
                                                             </motion.span>
@@ -713,7 +745,7 @@
                                             );
                                         })}
                                     </div>
-
+ 
                                     {/* Contingent Feedback Status Banner */}
                                     <div className="min-h-[60px]">
                                         <AnimatePresence mode="wait">
@@ -752,7 +784,7 @@
                                     </div>
 
                                 </div>
-                            </main>
+                            </div>
                         </div>
                     </section>
 
@@ -814,15 +846,16 @@
                     {/* ── Section 8: Final CTA ── */}
                     <section className="relative py-24 lg:py-32 px-6 md:px-16 border-t border-white/5 bg-background text-center">
                         <div className="max-w-3xl mx-auto">
-                            <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-6 leading-tight">
                                 The Future of Security Operations Isn't Reactive. <br />
                                 <span className="text-primary font-sora">It's Collaborative. Explainable. Intelligent.</span>
-                            </h3>
+                            </h2>
                             <div className="flex flex-wrap justify-center gap-4 pt-4">
                                 <a 
                                     href={dashboardUrl} 
                                     target={linkTarget}
                                     className="bg-primary text-primary-foreground px-8 py-4 text-xs tracking-wider uppercase font-bold rounded-sm cursor-pointer hover:brightness-110 transition-all active:scale-[0.97]"
+                                    aria-label="Console Login (opens decision center dashboard)"
                                 >
                                     Console Login
                                 </a>
@@ -830,6 +863,7 @@
                                     href="https://github.com" 
                                     target="_blank"
                                     className="bg-transparent text-foreground border border-foreground/30 hover:border-foreground/80 hover:bg-white/5 px-8 py-4 text-xs tracking-wider uppercase font-bold rounded-sm cursor-pointer transition-all active:scale-[0.97]"
+                                    aria-label="View Source Code on GitHub in a new tab"
                                 >
                                     View Source Code
                                 </a>
@@ -837,16 +871,18 @@
                         </div>
                     </section>
 
+                    </main>
+
                     {/* ── Footer ── */}
-                    <footer className="relative py-12 px-6 md:px-16 border-t border-white/5 bg-hero-bg text-muted-foreground text-xs">
+                    <footer className="relative py-12 px-6 md:px-16 border-t border-white/5 bg-hero-bg text-muted-foreground text-xs" aria-label="Footer details">
                         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                             <div>
                                 <p>&copy; {new Date().getFullYear()} Enterprise Council AI. All rights reserved.</p>
                                 <p className="mt-1 opacity-60">Splunk Hackathon 2026 &bull; Secure Consensus Decision Intelligence</p>
                             </div>
                             <div className="flex gap-6">
-                                <a href="https://github.com" target="_blank" className="hover:text-foreground transition-colors">GitHub Repository</a>
-                                <a href="http://localhost:8001/docs" target="_blank" className="hover:text-foreground transition-colors">API Docs</a>
+                                <a href="https://github.com" target="_blank" className="hover:text-foreground transition-colors" aria-label="GitHub Repository in a new tab">GitHub Repository</a>
+                                <a href="http://localhost:8001/docs" target="_blank" className="hover:text-foreground transition-colors" aria-label="Open API Documentation in a new tab">API Docs</a>
                             </div>
                         </div>
                     </footer>
@@ -860,6 +896,8 @@
                                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 className="fixed bottom-6 right-6 z-50 max-w-sm p-6 rounded-2xl glass-card text-foreground shadow-2xl border border-white/10"
+                                role="alert"
+                                aria-label="Cookie consent and security policy banner"
                             >
                                 <div className="flex items-start gap-4">
                                     <Shield className="text-primary w-6 h-6 shrink-0 mt-1" />
@@ -875,6 +913,7 @@
                                                     setCookieAccepted(true);
                                                 }}
                                                 className="bg-primary text-primary-foreground px-4 py-2 text-[10px] font-bold tracking-wider uppercase rounded-md hover:brightness-110 active:scale-95 transition-all"
+                                                aria-label="Accept all cookies and telemetry logging"
                                             >
                                                 Accept
                                             </button>
@@ -884,10 +923,11 @@
                                                     setCookieAccepted(true);
                                                 }}
                                                 className="bg-transparent border border-white/20 hover:border-white/50 px-4 py-2 text-[10px] font-bold tracking-wider uppercase rounded-md active:scale-95 transition-all text-muted-foreground hover:text-foreground"
+                                                aria-label="Decline cookies and telemetry logging"
                                             >
                                                 Decline
                                             </button>
-                                            <a href="#" className="text-[10px] text-primary hover:underline font-semibold uppercase tracking-wider ml-auto">
+                                            <a href="#" className="text-[10px] text-primary hover:underline font-semibold uppercase tracking-wider ml-auto" aria-label="Configure cookies and privacy settings">
                                                 Settings
                                             </a>
                                         </div>

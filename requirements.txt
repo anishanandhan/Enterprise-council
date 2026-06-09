@@ -1,13 +1,17 @@
-networkx
-pandas
-matplotlib
-streamlit
-google-genai
-splunk-sdk
-requests
-plotly
-fastapi
-uvicorn
-pydantic
-fpdf2
+# Core Dependencies
+networkx==3.6.1
+pandas==3.0.3
+matplotlib==3.10.9
+streamlit==1.58.0
+google-genai==2.8.0
+requests==2.34.2
+plotly==6.8.0
+fastapi==0.136.3
+uvicorn==0.49.0
+pydantic==2.13.4
+fpdf2==2.8.7
 
+# Dev Dependencies
+pytest==9.0.3
+pytest-cov==7.1.0
+httpx==0.28.1

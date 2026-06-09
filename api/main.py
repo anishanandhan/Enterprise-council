@@ -33,9 +33,24 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # CORS configuration
+ALLOWED_ORIGINS = [
+    "http://localhost:8501", # Streamlit default port 1
+    "http://localhost:8502", # Streamlit default port 2
+    "http://localhost:5173", # Vite default port
+    "http://localhost:3000", # React default port
+    "http://127.0.0.1:8501",
+    "http://127.0.0.1:8502",
+    "https://enterprise-council-ai.web.app",
+    "https://enterprise-council-ai.firebaseapp.com"
+]
+
+env_origins = os.environ.get("ALLOWED_ORIGINS", "")
+if env_origins:
+    ALLOWED_ORIGINS.extend([o.strip() for o in env_origins.split(",") if o.strip()])
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,6 +61,19 @@ app.add_middleware(
 ENABLE_HTTPS = os.environ.get("ENABLE_HTTPS", "false").lower() == "true"
 if ENABLE_HTTPS or (os.path.exists("api/key.pem") and os.path.exists("api/cert.pem")):
     app.add_middleware(HTTPSRedirectMiddleware)
+
+
+# Custom Security Headers Middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'self';"
+    return response
 
 
 

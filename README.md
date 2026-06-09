@@ -267,38 +267,83 @@ GEMINI_API_KEY=your_gemini_api_key
 * Active sessions automatically lock after 30 minutes of inactive idle state via front-end event monitoring.
 
 ### HTTP Security Headers
-Applied globally via FastAPI middleware configurations:
+Applied globally via FastAPI middleware configurations and Firebase Hosting configurations:
 | Header | Value | Purpose |
 |---|---|---|
+| Strict-Transport-Security | max-age=31536000; includeSubDomains; preload | Enforces HTTPS globally. |
 | X-Content-Type-Options | nosniff | Prevents browsers from MIME-sniffing responses. |
-| X-Frame-Options | DENY | Prevents clickjacking attacks by blocking iframe nesting. |
+| X-Frame-Options | SAMEORIGIN | Prevents clickjacking attacks by blocking unauthorized iframe nesting. |
 | Referrer-Policy | strict-origin-when-cross-origin | Controls the release of referrer information in headers. |
 | Permissions-Policy | camera=(), microphone=(), geolocation=() | Restricts browser-level API permissions. |
+| Content-Security-Policy | default-src 'self'; frame-ancestors 'self'; | Restricts where assets can load from and who can embed this app. |
 
 ### Input Validation
-* Direct validation sanitizes user, event, and severity parameters using alphanumeric regex expressions (`re.sub(r'[^\w\s\-]', '', text)`) to prevent SQL and SPL query injections.
+* Direct validation sanitizes user, event, and severity parameters using alphanumeric regex expressions (`re.sub(r'[^\w\s\-]', '', text)`) to prevent SQL, SPL (Splunk Search Processing Language), LDAP, and command injections.
 
 ### Sensitive Data Redaction
 * Credentials, access tokens, and webhook links entered in settings folders are automatically masked using password-type inputs.
 
 ---
 
+## Assumptions & Design Decisions
+
+* **Consensus-Driven Deliberation**: Rather than relying on a single monolithic LLM prompt, we model security decisions as a multi-agent debate (Security, Compliance, Infrastructure, Business). This prevents single-agent bias (e.g. blocking a critical database for a minor warning) and mirrors real-world corporate incident response councils.
+* **Digital Twin Representation**: The Enterprise Digital Twin is modeled locally using NetworkX. Nodes represent users, systems, credentials, databases, policies, and active alerts. This representation provides immediate local topological lookups (e.g. downstream dependency chains, blast radius estimation) without making expensive, slow calls to external graph databases during incident evaluation.
+* **Hybrid Risk Blending**: The risk scoring engine blends traditional rule-based logic (70%-80%) with ML/AI model outputs (20%-30%) from the Splunk AI Toolkit. This ensures reliable boundary containment scoring even if AI models fail or return unexpected values.
+* **Local Fallback Reliability**: When a live connection to Splunk Enterprise is unavailable, the application falls back gracefully to a high-fidelity mock client reading from version-controlled security log datasets. This guarantees zero-downtime demonstration readiness during hackathon evaluations.
+
+---
+
+## Testing
+
+A comprehensive test suite is integrated using `pytest` and `pytest-cov`, verifying the correctness and robustness of the entire application backend.
+
+### Running Tests
+To run the automated test suite locally:
+```bash
+# 1. Activate the virtual environment
+source venv/bin/activate
+
+# 2. Run the tests in verbose mode
+pytest tests/ -v --tb=short
+```
+
+### Checking Test Coverage
+To generate a detailed test coverage report:
+```bash
+pytest --cov=. tests/
+```
+
+### Scope of Testing
+* **Digital Twin Graph Model (`tests/test_twin.py`)**: Tests graph topology construction, node creation (User, Device, Database, etc.), service access queries, alert mapping, and downstream dependency resolution.
+* **Domain-Specific Agents (`tests/test_agents.py`)**: Validates agent opinion schemas, confidence bounds, and consensus weight calculations.
+* **FastAPI Developer API (`tests/test_api.py`)**: Tests health endpoints, input validation models, rate-limiting, and analyze request/response structures.
+* **Impact Simulation Engine (`tests/test_simulation.py`)**: Verifies Security, Business, and Compliance risk scoring functions, boundaries, and criticality level ordering.
+* **Multi-Agent Debate (`tests/test_debate.py`)**: Validates debate round orchestration, opponent pairing logic, and markdown transcript generation.
+* **Security & Injection Prevention (`tests/test_security.py`)**: Validates role-based permission checks (CISO, SOC Manager, SOC Analyst, Auditor), sanitization filters blocking SPL/SQL/XSS/Command injections, and HTTP security headers returned by the server.
+
+---
+
+## Accessibility (a11y)
+
+The Enterprise Council AI user interface is built to meet high accessibility standards:
+* **Skip-to-Content Link**: Fast-tabbing skip link (`Skip to Content`) is integrated to bypass navigation bars and leap directly to the main content area.
+* **Semantic Structure**: Uses a single, unique `<main>` landmark per page with clean section division (`<section>`) and strict chronological heading structures (`<h1>` down to `<h4>`).
+* **ARIA Landmarks and Labels**: Navigation bars, buttons, and dynamic selection lists contain descriptive `aria-label`, `aria-expanded`, and `aria-pressed` attributes to aid screen readers.
+* **Keyboard Navigation**: High-contrast outline rings ensure clear focus indicators on active elements during keyboard navigation.
+
+---
+
+## Performance Optimizations
+
+* **Lazy Module Loading**: In the Streamlit dashboard, heavy imports (such as NetworkX and Plotly) are loaded dynamically inside their respective render blocks, reducing initial page render time.
+* **Connection Pooling**: Uses unified singleton client patterns for LLM API calls and Splunk REST connections, avoiding connection renegotiation overhead.
+* **Oneshot REST Search**: Optimizes telemetry querying by requesting specific Oneshot search exports in raw CSV format, parsing them natively in Python to minimize JSON parsing overhead.
+
+---
+
 ## How to Contribute?
-Contributions are welcome! Please:
-1. Fork the repository.
-2. Create a feature branch:
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. Commit changes:
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-4. Push to branch:
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. Open a Pull Request targeting the develop branch.
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on code style, branching strategy, and the PR process.
 
 ---
 
