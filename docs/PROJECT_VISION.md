@@ -355,8 +355,8 @@ enterprise-council-ai/
 │
 ├── docs/
 │   ├── PROJECT_VISION.md
-│   ├── agents.md
-│   └── ../architecture_diagram.png
+│   └── agents.md
+├── architecture_diagram.png
 │
 ├── frontend/
 │   └── app.py
