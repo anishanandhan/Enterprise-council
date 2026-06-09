@@ -10,6 +10,7 @@ fastapi==0.136.3
 uvicorn==0.49.0
 pydantic==2.13.4
 fpdf2==2.8.7
+slowapi==0.1.9
 
 # Dev Dependencies
 pytest==9.0.3

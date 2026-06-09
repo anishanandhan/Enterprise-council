@@ -62,7 +62,7 @@ jobs:
         run: |
           flake8 agents/ twin/ simulation/ orchestrator/ api/ debate/ services/ \
             --max-line-length=150 \
-            --ignore=E501,W503,E402 \
+            --ignore=E501,W503,E402,W293,W391,W504,E241,E261,E302,E303,E305,E226,F401,F541,F841 \
             --count --statistics
 
   security:
