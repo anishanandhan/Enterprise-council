@@ -17,9 +17,9 @@ This directory contains the detailed architectural specifications, agent profile
 
 ## Architectural Diagrams and Assets
 
-The following visual aids are stored within this directory to support the documentation:
+The following visual aids support the documentation:
 
-* **Architecture Diagram** (`architecture_diagram.png`): High-level system architecture illustrating the flow of data from Splunk Enterprise through the MCP Server and Digital Twin to the Agent Debate Engine.
+* **Architecture Diagram** (`../architecture_diagram.png`): High-level system architecture illustrating the flow of data from Splunk Enterprise through the MCP Server and Digital Twin to the Agent Debate Engine.
 * **Authentication Gateway** (`auth_gateway.png`): User interface layout showing the federated identity selection screen.
 * **Operational Dashboard** (`dashboard_layout.png`): Console command center showing the live 5-panel layout, including the Digital Twin visualizer, agent opinions list, and debate transcript pane.
 * **Public Landing Page** (`landing_page.png`): Desktop layout of the marketing portal detailing the core problem, solution, and multi-agent debate features.

@@ -41,7 +41,6 @@ Thumbs.db
 
 # Test files
 test_*.png
-architecture_diagram.png
 
 # Test coverage
 .coverage
@@ -68,4 +67,3 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
