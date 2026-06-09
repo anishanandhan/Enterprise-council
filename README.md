@@ -32,7 +32,7 @@ A multi-agent decision intelligence console translating Splunk security telemetr
 ---
 
 ## About
-Enterprise Council AI is a decision intelligence system built to resolve critical security incidents. When an alert triggers, rather than relying on a single AI or hardcoded playbook rules, the platform constructs a live Digital Twin of the enterprise topology, convenes a council of specialized AI agents (Security, Infrastructure, Compliance, Business), and facilitates an autonomous multi-round debate to balance risk against operational uptime.
+Enterprise Council AI is a decision intelligence system built to resolve critical security incidents. When an alert triggers, rather than relying on a single AI or hardcoded playbook rules, the platform orchestrates a multi-agent debate where specialized AI agents (Security, Infrastructure, Compliance, Business) deliberate on the best containment actions.
 
 ### Key Highlights:
 * Multi-Agent Consensus: Specialized agents debate containment actions across 3 distinct rounds.
@@ -82,7 +82,7 @@ Enterprise Council AI is a decision intelligence system built to resolve critica
 
 ## Architecture
 
-![Architecture Diagram](docs/architecture_diagram.png)
+![Architecture Diagram](architecture_diagram.png)
 
 ```
 Splunk Enterprise
@@ -281,7 +281,7 @@ Applied globally via FastAPI middleware configurations and Firebase Hosting conf
 | Content-Security-Policy | default-src 'self'; frame-ancestors 'self'; | Restricts where assets can load from and who can embed this app. |
 
 ### Input Validation
-* Direct validation sanitizes user, event, and severity parameters using alphanumeric regex expressions (`re.sub(r'[^\w\s\-]', '', text)`) to prevent SQL, SPL (Splunk Search Processing Language), LDAP, and command injections.
+* Direct validation sanitizes user, event, and severity parameters using alphanumeric regex expressions (`re.sub(r'[^\w\s\-]', '', text)`) to prevent SQL, SPL (Splunk Search Processing Language), and XSS injection attacks.
 
 ### Sensitive Data Redaction
 * Credentials, access tokens, and webhook links entered in settings folders are automatically masked using password-type inputs.
@@ -290,10 +290,10 @@ Applied globally via FastAPI middleware configurations and Firebase Hosting conf
 
 ## Assumptions & Design Decisions
 
-* **Consensus-Driven Deliberation**: Rather than relying on a single monolithic LLM prompt, we model security decisions as a multi-agent debate (Security, Compliance, Infrastructure, Business). This prevents single-agent bias (e.g. blocking a critical database for a minor warning) and mirrors real-world corporate incident response councils.
-* **Digital Twin Representation**: The Enterprise Digital Twin is modeled locally using NetworkX. Nodes represent users, systems, credentials, databases, policies, and active alerts. This representation provides immediate local topological lookups (e.g. downstream dependency chains, blast radius estimation) without making expensive, slow calls to external graph databases during incident evaluation.
-* **Hybrid Risk Blending**: The risk scoring engine blends traditional rule-based logic (70%-80%) with ML/AI model outputs (20%-30%) from the Splunk AI Toolkit. This ensures reliable boundary containment scoring even if AI models fail or return unexpected values.
-* **Local Fallback Reliability**: When a live connection to Splunk Enterprise is unavailable, the application falls back gracefully to a high-fidelity mock client reading from version-controlled security log datasets. This guarantees zero-downtime demonstration readiness during hackathon evaluations.
+* **Consensus-Driven Deliberation**: Rather than relying on a single monolithic LLM prompt, we model security decisions as a multi-agent debate (Security, Compliance, Infrastructure, Business). This enables non-myopic policy decisions that respect both operational and regulatory imperatives.
+* **Digital Twin Representation**: The Enterprise Digital Twin is modeled locally using NetworkX. Nodes represent users, systems, credentials, databases, policies, and active alerts. This representation enables real-time graph queries and dependency tracing.
+* **Hybrid Risk Blending**: The risk scoring engine blends traditional rule-based logic (70%-80%) with ML/AI model outputs (20%-30%) from the Splunk AI Toolkit. This ensures reliable boundary conditions for edge cases.
+* **Local Fallback Reliability**: When a live connection to Splunk Enterprise is unavailable, the application falls back gracefully to a high-fidelity mock client reading from version-controlled datasets.
 
 ---
 
@@ -318,12 +318,12 @@ pytest --cov=. tests/
 ```
 
 ### Scope of Testing
-* **Digital Twin Graph Model (`tests/test_twin.py`)**: Tests graph topology construction, node creation (User, Device, Database, etc.), service access queries, alert mapping, and downstream dependency resolution.
+* **Digital Twin Graph Model (`tests/test_twin.py`)**: Tests graph topology construction, node creation (User, Device, Database, etc.), service access queries, alert mapping, and downstream dependencies.
 * **Domain-Specific Agents (`tests/test_agents.py`)**: Validates agent opinion schemas, confidence bounds, and consensus weight calculations.
 * **FastAPI Developer API (`tests/test_api.py`)**: Tests health endpoints, input validation models, rate-limiting, and analyze request/response structures.
 * **Impact Simulation Engine (`tests/test_simulation.py`)**: Verifies Security, Business, and Compliance risk scoring functions, boundaries, and criticality level ordering.
 * **Multi-Agent Debate (`tests/test_debate.py`)**: Validates debate round orchestration, opponent pairing logic, and markdown transcript generation.
-* **Security & Injection Prevention (`tests/test_security.py`)**: Validates role-based permission checks (CISO, SOC Manager, SOC Analyst, Auditor), sanitization filters blocking SPL/SQL/XSS/Command injections, and HTTP security headers returned by the server.
+* **Security & Injection Prevention (`tests/test_security.py`)**: Validates role-based permission checks (CISO, SOC Manager, SOC Analyst, Auditor), sanitization filters blocking SPL/SQL/XSS/Command injection.
 
 ---
 
