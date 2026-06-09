@@ -308,24 +308,12 @@ if not st.session_state["show_dashboard"]:
             port = 8502
 
         if is_cloud:
-            # Load landing page HTML directly to avoid cross-origin iframe issues
-            import streamlit.components.v1 as components
-            landing_html_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "index.html")
-            try:
-                with open(landing_html_path, "r", encoding="utf-8") as f:
-                    landing_html = f.read()
-                # Inject the streamlit_origin parameter for the Console Login redirect
-                landing_html = landing_html.replace(
-                    "streamlit_origin=http://localhost",
-                    "streamlit_origin=https://enterprise-council-ai.streamlit.app"
-                )
-                components.html(landing_html, height=1000, scrolling=True)
-            except FileNotFoundError:
-                st.error("Landing page not found. Please ensure index.html is in the project root.")
+            landing_url = "https://enterprise-council-ai.web.app/?streamlit_origin=https://enterprise-council-ai.streamlit.app"
         else:
             landing_url = f"http://localhost:8080/?streamlit_origin=http://localhost:{port}"
-            # Load landing page via native st.iframe with dynamic origin parameter
-            st.iframe(landing_url, height=1000)
+
+        # Load landing page via native st.iframe with dynamic origin parameter
+        st.iframe(landing_url, height=1000)
         st.stop()
 
 # Initialize model usage counters and timestamps
