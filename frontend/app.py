@@ -63,10 +63,20 @@ def render_auth_form():
         }
         
         /* Center block container vertical alignment with breathing room */
+        .main {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            min-height: 100vh !important;
+            width: 100% !important;
+        }
         .block-container {
-            padding-top: 6rem !important;
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
             max-width: 580px !important;
-            margin: auto !important;
+            width: 100% !important;
+            margin: 0 auto !important;
         }
         
         /* Extra padding for login card */
