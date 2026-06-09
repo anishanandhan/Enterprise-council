@@ -354,15 +354,6 @@
                                         {link}
                                     </a>
                                 ))}
-                                <span className="text-muted-foreground/35">|</span>
-                                <a 
-                                    href="http://localhost:8001/docs" 
-                                    target="_blank"
-                                    className="text-[10px] text-primary hover:text-foreground transition-colors uppercase tracking-widest font-semibold"
-                                    aria-label="Open API Documentation in a new tab"
-                                >
-                                    API Docs
-                                </a>
                             </div>
                             <a 
                                 href={dashboardUrl} 
@@ -403,14 +394,6 @@
 
                             {/* Desktop CTA */}
                             <div className="hidden lg:flex flex-row items-center gap-6 text-[18px] text-black">
-                                <a 
-                                    href="http://localhost:8001/docs" 
-                                    target="_blank" 
-                                    className="hover:opacity-60 transition-opacity underline underline-offset-2"
-                                    aria-label="Open API Documentation in a new tab"
-                                >
-                                    API Docs
-                                </a>
                                 <a 
                                     href={dashboardUrl} 
                                     target={linkTarget} 
@@ -454,15 +437,6 @@
                                     aria-label="Console Login (opens decision center dashboard)"
                                 >
                                     Console Login
-                                </a>
-                                <a 
-                                    href="http://localhost:8001/docs" 
-                                    target="_blank"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="text-xl text-emerald-700 font-semibold underline underline-offset-4"
-                                    aria-label="Open API Documentation in a new tab"
-                                >
-                                    API Docs
                                 </a>
                             </div>
                         </header>
@@ -889,7 +863,6 @@
                             </div>
                             <div className="flex gap-6">
                                 <a href="https://github.com" target="_blank" className="hover:text-foreground transition-colors" aria-label="GitHub Repository in a new tab">GitHub Repository</a>
-                                <a href="http://localhost:8001/docs" target="_blank" className="hover:text-foreground transition-colors" aria-label="Open API Documentation in a new tab">API Docs</a>
                             </div>
                         </div>
                     </footer>
