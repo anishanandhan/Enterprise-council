@@ -327,7 +327,7 @@ if not st.session_state["show_dashboard"]:
                 # Inject the streamlit_origin parameter for the Console Login redirect
                 landing_html = landing_html.replace(
                     "streamlit_origin=http://localhost",
-                    "streamlit_origin=https://enterprise-council-ai.streamlit.app"
+                    "streamlit_origin=https://enterprise-council-ai-58611599850.us-central1.run.app"
                 )
                 components.html(landing_html, height=1000, scrolling=True)
             except FileNotFoundError:
