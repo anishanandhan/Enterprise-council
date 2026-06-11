@@ -1,0 +1,17 @@
+venv/
+.git/
+.gitignore
+.dockerignore
+.pytest_cache/
+.coverage
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.db
+.sqlite
+tests/
+.github/
+*.png
+*.webp

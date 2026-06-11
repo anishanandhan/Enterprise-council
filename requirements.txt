@@ -1,3 +1,5 @@
+--index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
 # Core Dependencies
 networkx==3.6.1
 pandas==3.0.3
