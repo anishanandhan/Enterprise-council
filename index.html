@@ -201,7 +201,7 @@
             const videoRef = useRef(null);
             const prevX = useRef(null);
             const isProd = typeof window !== 'undefined' && !window.location.hostname.includes("localhost") && window.location.hostname !== "127.0.0.1";
-            const defaultUrl = isProd ? "https://enterprise-council-ai.streamlit.app/?page=auth" : "http://localhost:8502/?page=auth";
+            const defaultUrl = isProd ? "https://enterprise-council-ai-58611599850.us-central1.run.app/?page=auth" : "http://localhost:8502/?page=auth";
             const [dashboardUrl, setDashboardUrl] = useState(defaultUrl);
             const [linkTarget, setLinkTarget] = useState("_top");
 
@@ -243,7 +243,7 @@
                     setLoading(false);
                 }, 1000);
 
-                let parentOrigin = "https://enterprise-council-ai.streamlit.app";
+                let parentOrigin = "https://enterprise-council-ai-58611599850.us-central1.run.app";
                 if (window.location.hostname.includes("localhost") || window.location.hostname === "127.0.0.1") {
                     parentOrigin = "http://localhost:8502";
                 }
