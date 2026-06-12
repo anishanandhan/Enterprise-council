@@ -36,7 +36,7 @@ class InfrastructureAgent:
 
         # Check production-critical services dynamically from the graph
         affected_critical = [
-            s for s in direct 
+            s for s in direct
             if graph.G.nodes.get(s, {}).get("criticality") == "High"
         ]
 

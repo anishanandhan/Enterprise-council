@@ -42,7 +42,7 @@ class SecurityAgent:
 
         # Check for sensitive system access dynamically from the graph
         touches_sensitive = [
-            s for s in services 
+            s for s in services
             if graph.G.nodes.get(s, {}).get("criticality") == "High"
         ]
 

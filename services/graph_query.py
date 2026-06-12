@@ -49,7 +49,7 @@ def get_criticality(graph, user):
 
     # Query criticality dynamically from node attributes in the Digital Twin graph
     critical_connections = [
-        s for s in services 
+        s for s in services
         if graph.G.nodes.get(s, {}).get("criticality") == "High"
     ]
 
