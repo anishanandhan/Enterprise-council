@@ -24,6 +24,42 @@ from twin.graph_model import EnterpriseGraph
 from twin.entities import User, Device, Service, Database, Department, Alert, Policy
 
 
+def verify_event_signature(row):
+    """
+    Cryptographically verify the integrity of the telemetry event row to prevent Graph Poisoning.
+    Simulates identity verification and cryptographic signatures (e.g. SPIFFE/SPIRE context) 
+    associated with incoming Splunk logs.
+    """
+    import os
+    import hmac
+    import hashlib
+
+    # If telemetry signatures are required, validate the signature or token
+    require_sigs = os.environ.get("REQUIRE_TELEMETRY_SIGNATURES", "false").lower() == "true"
+    if not require_sigs:
+        return True
+
+    # Critical fields determining topology relationship
+    fields = [row.get("user", ""), row.get("device", ""), row.get("event", ""), row.get("service", ""), row.get("department", "")]
+    payload = "|".join(filter(None, fields))
+    
+    # We expect a telemetry signature header or field
+    received_sig = row.get("_telemetry_signature")
+    if not received_sig:
+        print(f"  [Security Alert] Event missing cryptographic signature. Skipping to prevent Graph Poisoning: {row}")
+        return False
+        
+    # Verify signature using shared secret (mocking HSM/SPIFFE identity vault)
+    secret = b"spiffe_twin_sync_secret_key_2026"
+    expected_sig = hmac.new(secret, payload.encode(), hashlib.sha256).hexdigest()
+    
+    if not hmac.compare_digest(received_sig, expected_sig):
+        print(f"  [Security Alert] Cryptographic signature mismatch! Target event payload: {payload}. Skipping to prevent spoofing.")
+        return False
+        
+    return True
+
+
 def sync_twin():
     """
     Build the Digital Twin from Splunk data (or CSV fallback).
@@ -37,6 +73,8 @@ def sync_twin():
     print("  [Sync] Fetching business events...")
     business_events = client.search(BUSINESS_EVENTS)
     for row in business_events:
+        if not verify_event_signature(row):
+            continue
         user = row.get("user", "")
         dept = row.get("department", "")
         if user and not graph.G.has_node(user):
@@ -50,6 +88,8 @@ def sync_twin():
     print("  [Sync] Fetching security events...")
     security_events = client.search(SECURITY_EVENTS)
     for row in security_events:
+        if not verify_event_signature(row):
+            continue
         user = row.get("user", "")
         device = row.get("device", "")
         event = row.get("event", "")
@@ -70,6 +110,8 @@ def sync_twin():
     print("  [Sync] Fetching infrastructure events...")
     infra_events = client.search(INFRA_EVENTS)
     for row in infra_events:
+        if not verify_event_signature(row):
+            continue
         service = row.get("service", "")
         event = row.get("event", "")
 
@@ -91,6 +133,8 @@ def sync_twin():
     print("  [Sync] Fetching compliance events...")
     compliance_events = client.search(COMPLIANCE_EVENTS)
     for row in compliance_events:
+        if not verify_event_signature(row):
+            continue
         event = row.get("event", "")
         policy = row.get("policy", "")
 

@@ -87,10 +87,24 @@ class SplunkClient:
         self.token = os.environ.get("SPLUNK_TOKEN", None)
         self.base_url = f"https://{self.host}:{self.port}"
 
-        # Splunk uses self-signed certs by default
+        # Production SSL Validation Check
         self.ssl_context = ssl.create_default_context()
-        self.ssl_context.check_hostname = False
-        self.ssl_context.verify_mode = ssl.CERT_NONE
+        ca_file = os.environ.get("SPLUNK_SSL_CA")
+        ignore_ssl = os.environ.get("SPLUNK_IGNORE_SSL", "true").lower() == "true"
+        
+        if ca_file and os.path.exists(ca_file):
+            self.ssl_context.load_verify_locations(cafile=ca_file)
+            self.ssl_context.check_hostname = True
+            self.ssl_context.verify_mode = ssl.CERT_REQUIRED
+            print(f"  [Security] Verifying Splunk SSL certificates using CA file: {ca_file}")
+        elif not ignore_ssl:
+            self.ssl_context.check_hostname = True
+            self.ssl_context.verify_mode = ssl.CERT_REQUIRED
+            print("  [Security] Verifying Splunk SSL certificates using system default CA bundle.")
+        else:
+            self.ssl_context.check_hostname = False
+            self.ssl_context.verify_mode = ssl.CERT_NONE
+            print("  [Security Warning] SSL validation disabled for Splunk connection (check SPLUNK_IGNORE_SSL). Vulnerable to MitM.")
 
     def _request(self, method, path, data=None, params=None):
         """Make an authenticated request to the Splunk REST API."""
@@ -109,6 +123,9 @@ class SplunkClient:
             auth_prefix = "Bearer" if os.environ.get("SPLUNK_TOKEN") == self.token else "Splunk"
             req.add_header("Authorization", f"{auth_prefix} {self.token}")
         else:
+            print("  [Security Warning] Using basic credentials auth fallback instead of token-based authentication.")
+            if os.environ.get("BLOCK_BASIC_AUTH", "false").lower() == "true":
+                raise PermissionError("Security Policy Violation: Basic Authentication is blocked. Configure a SPLUNK_TOKEN.")
             import base64
             credentials = base64.b64encode(
                 f"{self.username}:{self.password}".encode()

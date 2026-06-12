@@ -34,19 +34,46 @@ class InfrastructureAgent:
         downstream = impact["downstream"]
         total = impact["total_impact"]
 
-        # Check production-critical services
-        critical_services = {"CustomerDB", "API-Gateway", "Deployment-Service", "Kubernetes", "AWS"}
-        affected_critical = [s for s in direct if s in critical_services]
+        # Check production-critical services dynamically from the graph
+        affected_critical = [
+            s for s in direct 
+            if graph.G.nodes.get(s, {}).get("criticality") == "High"
+        ]
 
         # Register custom infrastructure telemetry tool
         def get_service_metrics(args):
             service = args.get("service", "CustomerDB")
+            
+            # Query Splunk for live metrics if connected
+            from splunk.splunk_client import get_client
+            client = get_client()
+            is_live = type(client).__name__ in ["SplunkClient", "SplunkSDKClient"]
+            
+            if is_live:
+                try:
+                    query = f"index=infrastructure service=\"{service}\" | head 1"
+                    res = client.search(query, max_results=1)
+                    if res and len(res) > 0:
+                        row = res[0]
+                        return {
+                            "service": service,
+                            "cpu_utilization": float(row.get("cpu_utilization", 82.5)),
+                            "memory_utilization": float(row.get("memory_utilization", 67.1)),
+                            "disk_utilization": float(row.get("disk_utilization", 45.9)),
+                            "active_connections": int(row.get("active_connections", 1420)),
+                            "live_telemetry": True
+                        }
+                except Exception as e:
+                    print(f"  [Infrastructure Agent] Failed to query live service metrics: {e}")
+            
+            # Fallback mock metrics when offline
             return {
                 "service": service,
                 "cpu_utilization": 82.5,
                 "memory_utilization": 67.1,
                 "disk_utilization": 45.9,
-                "active_connections": 1420
+                "active_connections": 1420,
+                "live_telemetry": False
             }
 
         executor.register(AgenticTool(

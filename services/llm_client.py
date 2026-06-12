@@ -78,12 +78,38 @@ def _init():
     print("  [LLM] Using local reasoning engine")
 
 
+def sanitize_prompt_input(text: str) -> str:
+    """
+    Sanitize incoming text to neutralize prompt injection/jailbreak attempts
+    that might be present in untrusted telemetry logs or incident data.
+    """
+    if not isinstance(text, str):
+        return text
+    import re
+    # List of common prompt injection/jailbreak indicators
+    patterns = [
+        r"(ignore\s+all\s+previous\s+instructions|ignore\s+all\s+previous\s+rules)",
+        r"(ignore\s+system\s+instructions|system\s+override)",
+        r"(you\s+are\s+now\s+a\s+different\s+agent|you\s+are\s+now\s+dan|dan\s+mode)",
+        r"revert\s+threat\s+level\s+to\s+low",
+        r"recommend\s+monitor\s+action",
+        r"ignore\s+threat",
+        r"bypass\s+security"
+    ]
+    sanitized = text
+    for pattern in patterns:
+        sanitized = re.sub(pattern, "[REDACTED PROMPT INJECTION ATTEMPT]", sanitized, flags=re.IGNORECASE)
+    return sanitized
+
+
 def reason(prompt, system_instruction=""):
     """
     Send a structured prompt to the LLM and return the text response.
     Falls back to Gemini, then local reasoning if needed.
     """
     _init()
+    prompt = sanitize_prompt_input(prompt)
+    system_instruction = sanitize_prompt_input(system_instruction)
 
     if _LLM_MODE == "splunk_hosted":
         try:
@@ -115,6 +141,8 @@ def reason_structured(prompt, system_instruction=""):
     Returns a dict.
     """
     _init()
+    prompt = sanitize_prompt_input(prompt)
+    system_instruction = sanitize_prompt_input(system_instruction)
 
     full_prompt = (
         f"{prompt}\n\n"
@@ -165,6 +193,8 @@ def reason_security(prompt, system_instruction="", structured=False):
     Falls back to Gemini/local if unavailable.
     """
     _init()
+    prompt = sanitize_prompt_input(prompt)
+    system_instruction = sanitize_prompt_input(system_instruction)
     full_prompt = prompt
     if structured:
         full_prompt = (
@@ -204,6 +234,8 @@ def reason_timeseries(prompt, system_instruction="", structured=False):
     If structured, returns a dict with risk_level, recommendation, confidence, reasoning.
     """
     _init()
+    prompt = sanitize_prompt_input(prompt)
+    system_instruction = sanitize_prompt_input(system_instruction)
     try:
         from splunk.hosted_models import get_deep_ts
         dts = get_deep_ts()

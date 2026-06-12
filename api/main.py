@@ -201,10 +201,11 @@ if __name__ == "__main__":
     # Look for cert files in api directory or root
     ssl_key = "api/key.pem"
     ssl_cert = "api/cert.pem"
+    is_dev = os.environ.get("ENV", "production").lower() == "development"
     if os.path.exists(ssl_key) and os.path.exists(ssl_cert):
         print("Starting FastAPI with HTTPS/SSL enabled...")
-        uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True, ssl_keyfile=ssl_key, ssl_certfile=ssl_cert)
+        uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=is_dev, ssl_keyfile=ssl_key, ssl_certfile=ssl_cert)
     else:
-        print("Starting FastAPI with HTTP (No SSL) on port 8001...")
-        uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+        print(f"Starting FastAPI with HTTP (No SSL) on port 8001 (reload={'True' if is_dev else 'False'})...")
+        uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=is_dev)
 

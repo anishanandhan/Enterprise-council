@@ -43,10 +43,22 @@ class ComplianceAgent:
             }
 
         def get_audit_trail(args):
+            # Dynamic cryptographic hash generation of the incident state
+            import hashlib
+            import hmac
+            evidence = f"{user}:{event}:{severity}:{is_sensitive}"
+            integrity_hash = hashlib.sha256(evidence.encode()).hexdigest()
+            
+            # Simulate anchoring the hash using a GCP Confidential Ledger or private HSM signature
+            hsm_key = b"splunk_hsm_audit_key_2026"
+            digital_signature = hmac.new(hsm_key, integrity_hash.encode(), hashlib.sha256).hexdigest()
+            
             return {
                 "audit_logs_secured": True,
-                "integrity_hash": "sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                "retention_policy": "90 Days Active"
+                "integrity_hash": f"sha256-{integrity_hash}",
+                "audit_anchored_ledger": True,
+                "hsm_digital_signature": digital_signature,
+                "retention_policy": "90 Days Active under GDPR Art. 30"
             }
 
         executor.register(AgenticTool(

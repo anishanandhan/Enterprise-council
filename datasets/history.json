@@ -3004,5 +3004,65 @@
     "spl": "index=business user=\"john\" | table user role department criticality",
     "method": "foundation-sec-1.1-8b-instruct",
     "timestamp": "2026-06-08T11:27:35Z"
+  },
+  {
+    "natural_language": "Show all activity for John relating to Privilege Escalation",
+    "spl": "index=security user=\"John\" event=\"Privilege Escalation\"",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:03Z"
+  },
+  {
+    "natural_language": "Show all logs for user John related to Privilege Escalation",
+    "spl": "index=security user=John event=\"Privilege Escalation\"",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:06Z"
+  },
+  {
+    "natural_language": "Generate a Splunk SPL query to find evidence in the compliance index that supports or disproves this agent position: Security Agent's stance that we should Block account immediately and initiate forensic investigation\nThe query MUST search index=compliance not any other index.\nUser under investigation: John\nReturn only the SPL query, nothing else.",
+    "spl": "index=compliance event=\"Privilege Escalation\" | table timestamp event policy risk",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:21Z"
+  },
+  {
+    "natural_language": "Generate a Splunk SPL query to find evidence in the infrastructure index that supports or disproves this agent position: Compliance Agent's stance that we should Preserve all evidence and initiate formal investigation\nThe query MUST search index=infrastructure not any other index.\nUser under investigation: John\nReturn only the SPL query, nothing else.",
+    "spl": "index=infrastructure service=\"CustomerDB\" | stats count by event severity | sort -count",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:21Z"
+  },
+  {
+    "natural_language": "Generate a Splunk SPL query to find evidence in the security index that supports or disproves this agent position: Compliance Agent's stance that we should Preserve all evidence and initiate formal investigation\nThe query MUST search index=security not any other index.\nUser under investigation: John\nReturn only the SPL query, nothing else.",
+    "spl": "index=security user=\"john\" | stats count by severity event | sort -count",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:21Z"
+  },
+  {
+    "natural_language": "Generate a Splunk SPL query to find evidence in the business index that supports or disproves this agent position: Security Agent's stance that we should Block account immediately and initiate forensic investigation\nThe query MUST search index=business not any other index.\nUser under investigation: John\nReturn only the SPL query, nothing else.",
+    "spl": "index=business user=\"john\" | table user role department criticality",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:21Z"
+  },
+  {
+    "natural_language": "Show all activity for System relating to CPU Spike",
+    "spl": "index=security user=\"system\" | sort timestamp | table timestamp event severity device",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:24Z"
+  },
+  {
+    "natural_language": "Show all logs for user System related to CPU Spike",
+    "spl": "index=infrastructure service=\"*\" | stats count by event severity | sort -count",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:26Z"
+  },
+  {
+    "natural_language": "Generate a Splunk SPL query to find evidence in the business index that supports or disproves this agent position: Infrastructure Agent's stance that we should Do NOT block. Peak load forecast of 89% indicates extreme cascading failure risk.\nThe query MUST search index=business not any other index.\nUser under investigation: System\nReturn only the SPL query, nothing else.",
+    "spl": "index=business user=\"system\" | table user role department criticality",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:27Z"
+  },
+  {
+    "natural_language": "Generate a Splunk SPL query to find evidence in the infrastructure index that supports or disproves this agent position: Business Agent's stance that we should Avoid full block \u2014 use temporary restriction only\nThe query MUST search index=infrastructure not any other index.\nUser under investigation: System\nReturn only the SPL query, nothing else.",
+    "spl": "index=infrastructure service=\"CustomerDB\" | stats count by event severity | sort -count",
+    "method": "foundation-sec-1.1-8b-instruct",
+    "timestamp": "2026-06-12T21:45:27Z"
   }
 ]

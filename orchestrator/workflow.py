@@ -149,10 +149,10 @@ def run_council(incident, verbose=True):
         print("  Stage 4: AGENT ANALYSIS")
         print("-" * 60)
 
-    opinions = []
-    for agent in plan["agents"]:
-        opinion = agent.analyze(incident, twin)
-        opinions.append(opinion)
+    import concurrent.futures
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(plan["agents"])) as executor:
+        futures = [executor.submit(agent.analyze, incident, twin) for agent in plan["agents"]]
+        opinions = [f.result() for f in futures]
 
     result["stages"]["opinions"] = [
         {

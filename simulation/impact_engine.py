@@ -93,7 +93,8 @@ def simulate(incident, graph):
         sec = security_risk(action, context)
         biz = business_risk(action, context)
         comp = compliance_risk(action, context)
-        total = sec + biz + comp
+        # Normalize total risk back to 0-100% range by averaging
+        total = int((sec + biz + comp) / 3)
 
         # Find matching scenario
         scenario = next((s for s in scenarios if s["action"] == action), None)

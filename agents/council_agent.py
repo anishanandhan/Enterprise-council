@@ -50,14 +50,15 @@ class CouncilAgent:
         total_score = sum(v["score"] for v in votes)
         avg_score = total_score / len(votes) if votes else 0
 
-        # Determine overall risk from agent opinions
-        risk_priority = ["Critical", "High", "Medium", "Low"]
-        risk_levels = [o.risk_level for o in opinions]
-        overall_risk = "Low"
-        for level in risk_priority:
-            if level in risk_levels:
-                overall_risk = level
-                break
+        # Determine overall risk based on the weighted average vote score (avg_score)
+        if avg_score >= 0.75:
+            overall_risk = "Critical"
+        elif avg_score >= 0.50:
+            overall_risk = "High"
+        elif avg_score >= 0.25:
+            overall_risk = "Medium"
+        else:
+            overall_risk = "Low"
 
         # If simulation is available, use it for the decision
         if simulation:
@@ -66,13 +67,13 @@ class CouncilAgent:
                 s for s in simulation["simulations"]
                 if s["action"] == simulation["recommended_action"]
             )
-            # Scale confidence dynamically between 80% and 95% based on relative risk
-            council_confidence = round(0.95 - (best_sim["total_risk"] / 300) * 0.15, 2)
+            # Scale confidence dynamically between 80% and 95% based on relative risk (normalized to 100)
+            council_confidence = round(0.95 - (best_sim["total_risk"] / 100) * 0.15, 2)
         else:
-            # Fallback to opinion-based decision
-            if overall_risk == "Critical":
+            # Fallback to opinion-based decision using weighted consensus score (avg_score)
+            if avg_score >= 0.75:
                 decision = "Temporary Restriction"
-            elif overall_risk == "High":
+            elif avg_score >= 0.45:
                 decision = "Restricted Access"
             else:
                 decision = "Continued Monitoring"

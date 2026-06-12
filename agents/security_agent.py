@@ -40,9 +40,11 @@ class SecurityAgent:
         services = get_user_services(graph, user)
         criticality = get_criticality(graph, user)
 
-        # Check for sensitive system access
-        sensitive_systems = {"CustomerDB", "AWS"}
-        touches_sensitive = [s for s in services if s in sensitive_systems]
+        # Check for sensitive system access dynamically from the graph
+        touches_sensitive = [
+            s for s in services 
+            if graph.G.nodes.get(s, {}).get("criticality") == "High"
+        ]
 
         # Register custom threat intelligence tool
         def get_threat_intel(args):

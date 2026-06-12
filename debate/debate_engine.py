@@ -80,26 +80,22 @@ class DebateEngine:
             "statements": []
         }
 
-        for i, opinion in enumerate(opinions):
-            # Find the agent with the most different position
+        def process_rebuttal(i, opinion):
             others = [o for j, o in enumerate(opinions) if j != i]
             if not others:
-                continue
+                return None
 
-            # Pick the agent with the biggest risk disagreement
             opponent = max(others, key=lambda o: abs(
                 self._risk_score(o.risk_level) -
                 self._risk_score(opinion.risk_level)
             ))
 
-            # Dynamically formulate investigation queries via saia_generate_spl
             evidence = ""
             spl_query = ""
             try:
                 from splunk.mcp_client import get_mcp_server
                 mcp_server = get_mcp_server()
                 
-                # Get the domain index mapping for the querying agent
                 agent_index_map = {
                     "Security Agent": "security",
                     "Compliance Agent": "compliance",
@@ -108,7 +104,6 @@ class DebateEngine:
                 }
                 agent_domain_index = agent_index_map.get(opinion.agent_name, "security")
                 
-                # Retrieve user under investigation
                 target_user = "John"
                 if simulation and "user_context" in simulation:
                     target_user = simulation["user_context"].get("user", "John")
@@ -125,30 +120,42 @@ class DebateEngine:
                 spl_gen = mcp_server.call_tool("saia_generate_spl", {"question": question})
                 if not spl_gen.is_error and spl_gen.content and "spl" in spl_gen.content:
                     spl_query = spl_gen.content["spl"]
-                    # Execute Splunk query live
                     query_run = mcp_server.call_tool("splunk_run_query", {"query": spl_query, "max_results": 2})
                     if not query_run.is_error and query_run.content:
                         res_count = query_run.content.get("result_count", 0)
                         evidence = f"Ran live query via MCP: `{spl_query}` -> {res_count} events found."
                         if res_count > 0:
                             sample = query_run.content.get("results", [{}])[0]
-                            # Clean up sample dictionary to print compactly
                             clean_sample = {k: v for k, v in sample.items() if not k.startswith("_")}
                             evidence += f" Sample event: {clean_sample}"
             except Exception as e:
                 evidence = f"Failed to retrieve dynamic evidence via MCP: {str(e)}"
 
             rebuttal = self._generate_rebuttal(opinion, opponent, simulation, evidence)
-
-            statement = {
-                "agent": opinion.agent_name,
-                "responding_to": opponent.agent_name,
-                "argument": rebuttal,
+            return {
+                "opinion": opinion,
+                "opponent": opponent,
+                "rebuttal": rebuttal,
                 "spl_query": spl_query
+            }
+
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(opinions)) as executor:
+            futures = [executor.submit(process_rebuttal, i, opinion) for i, opinion in enumerate(opinions)]
+            results = [f.result() for f in futures]
+
+        for res in results:
+            if res is None:
+                continue
+            statement = {
+                "agent": res["opinion"].agent_name,
+                "responding_to": res["opponent"].agent_name,
+                "argument": res["rebuttal"],
+                "spl_query": res["spl_query"]
             }
             round2["statements"].append(statement)
             self.transcript.append(
-                f"[Round 2] {opinion.agent_name} → {opponent.agent_name}: {rebuttal}"
+                f"[Round 2] {res['opinion'].agent_name} → {res['opponent'].agent_name}: {res['rebuttal']}"
             )
 
         rounds.append(round2)
@@ -161,8 +168,15 @@ class DebateEngine:
             "statements": []
         }
 
-        for opinion in opinions:
+        def process_final(opinion):
             final = self._generate_final_position(opinion, opinions, simulation)
+            return opinion, final
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(opinions)) as executor:
+            futures = [executor.submit(process_final, opinion) for opinion in opinions]
+            results3 = [f.result() for f in futures]
+
+        for opinion, final in results3:
             statement = {
                 "agent": opinion.agent_name,
                 "final_position": final,

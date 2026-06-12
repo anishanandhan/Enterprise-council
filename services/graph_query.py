@@ -38,13 +38,20 @@ def get_user_alerts(graph, user):
     return alerts
 
 
+import time
+
+GRAPH_QUERY_TIMEOUT = 2.0  # Limit query execution to 2 seconds
+
 def get_criticality(graph, user):
     """How critical is this user based on their connections?"""
     services = get_user_services(graph, user)
     alerts = get_user_alerts(graph, user)
 
-    critical_systems = {"CustomerDB", "AWS", "Kubernetes", "Deployment-Service", "API-Gateway"}
-    critical_connections = [s for s in services if s in critical_systems]
+    # Query criticality dynamically from node attributes in the Digital Twin graph
+    critical_connections = [
+        s for s in services 
+        if graph.G.nodes.get(s, {}).get("criticality") == "High"
+    ]
 
     if len(critical_connections) >= 3 and len(alerts) >= 2:
         return "Very High"
@@ -58,11 +65,16 @@ def get_criticality(graph, user):
 
 def get_affected_systems(graph, user):
     """If we block this user, what systems are affected downstream?"""
+    start_time = time.time()
     direct = get_user_services(graph, user)
 
     downstream = set()
     for svc in direct:
         for src, tgt, data in graph.G.edges(data=True):
+            # Enforce execution timeout check to prevent DoS on large topologies
+            if time.time() - start_time > GRAPH_QUERY_TIMEOUT:
+                print("  [Security Alert] Digital Twin graph query exceeded execution timeout limit. Halting query.")
+                break
             if src == svc and data.get("relation") in ("USES", "DEPENDS_ON"):
                 downstream.add(tgt)
             if tgt == svc and data.get("relation") in ("USES", "DEPENDS_ON"):

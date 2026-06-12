@@ -67,6 +67,21 @@ class AgenticToolExecutor:
             client = get_client()
             spl = args.get("spl", "index=security | head 5")
             max_results = args.get("max_results", 20)
+            
+            # Restrict SPL search queries to read-only commands to prevent DoS or data destruction
+            destructive_commands = ["delete", "outputlookup", "collect", "run", "outputcsv"]
+            spl_lower = spl.lower()
+            
+            for cmd in destructive_commands:
+                if f"| {cmd}" in spl_lower or spl_lower.strip().startswith(cmd):
+                    print(f"  [Security Block] Blocked destructive/unbounded SPL command '{cmd}' execution attempt.")
+                    return {
+                        "query": spl,
+                        "result_count": 0,
+                        "results": [],
+                        "error": f"Security violation: The command '{cmd}' is restricted. Only read-only queries are allowed."
+                    }
+            
             results = client.search(spl, max_results=max_results)
             return {
                 "query": spl,
