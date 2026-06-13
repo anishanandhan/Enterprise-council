@@ -5,12 +5,12 @@ A multi-agent decision intelligence console translating Splunk security telemetr
 
 [![License](https://img.shields.io/github/license/anishanandhan/Enterprise-council?style=flat-square&color=emerald)](LICENSE)
 
-## 🚀 LIVE DEMO: [https://enterprise-council-ai.streamlit.app/](https://enterprise-council-ai.streamlit.app/)
+## 🚀 LIVE DEMO: [[https://enterprise-council-ai.streamlit.app/](https://enterprise-council-ai-58611599850.us-central1.run.app/)]([https://enterprise-council-ai.streamlit.app/](https://enterprise-council-ai-58611599850.us-central1.run.app/))
 
 [![Streamlit App](https://img.shields.io/badge/Streamlit-App-red?style=flat-square&logo=streamlit)](https://enterprise-council-ai.streamlit.app/)
 [![FastAPI Docs](https://img.shields.io/badge/FastAPI-Docs-blue?style=flat-square&logo=fastapi)](http://localhost:8001/docs)
 
-**Live Demo:** [https://enterprise-council-ai.streamlit.app/](https://enterprise-council-ai.streamlit.app/) | [FastAPI Docs](http://localhost:8001/docs) | [Architecture Guide](architecture_diagram.md)
+**Live Demo:** [(https://enterprise-council-ai-58611599850.us-central1.run.app/)](https://enterprise-council-ai-58611599850.us-central1.run.app/) | [Architecture Guide](architecture_diagram.md)
 
 ---
 
