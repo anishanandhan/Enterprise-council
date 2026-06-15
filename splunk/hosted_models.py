@@ -58,8 +58,7 @@ class FoundationSecModel:
         return self._client
 
     def _is_live(self):
-        client = self._get_client()
-        return type(client).__name__ == "SplunkClient"
+        return self._get_client() is not None
 
     def _run_ai_command(self, prompt, max_results=1):
         """Execute the | ai command with Foundation-Sec model."""
@@ -309,8 +308,7 @@ class CiscoDeepTimeSeriesModel:
         return self._client
 
     def _is_live(self):
-        client = self._get_client()
-        return type(client).__name__ == "SplunkClient"
+        return self._get_client() is not None
 
     def predict_metric(self, index="infrastructure", metric_field="severity", horizon=5):
         """

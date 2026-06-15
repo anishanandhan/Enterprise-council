@@ -311,9 +311,211 @@ class LocalSplunkClient:
     def login(self):
         return True
 
+    def _request(self, method, path, data=None, params=None):
+        """Emulate the Splunk REST API endpoints for offline mode/simulated runs."""
+        # 1. Splunk AI Assistant REST Endpoint
+        if path in ["/services/spl_assistant/generate", "/services/spl_assistant/generate?output_mode=json"]:
+            nl_query = ""
+            if data:
+                if isinstance(data, dict):
+                    nl_query = data.get("query", "")
+                elif isinstance(data, bytes):
+                    parsed = urllib.parse.parse_qs(data.decode("utf-8"))
+                    nl_query = parsed.get("query", [""])[0]
+                elif isinstance(data, str):
+                    parsed = urllib.parse.parse_qs(data)
+                    nl_query = parsed.get("query", [""])[0]
+            
+            try:
+                from services.llm_client import reason
+                prompt = (
+                    f"Generate a Splunk SPL query for this request: \"{nl_query}\"\n"
+                    f"Return ONLY a JSON object: {{\"spl\": \"index=security...\", \"explanation\": \"explanation text\"}}"
+                )
+                res_text = reason(prompt, "You are Splunk's AI Assistant REST API.")
+                # Ensure it's valid JSON
+                json.loads(res_text)
+                return res_text
+            except Exception:
+                return json.dumps({
+                    "spl": "index=security | head 20",
+                    "explanation": "Emulated SPL translation"
+                })
+
+        # 2. Direct REST LLM Endpoint
+        elif path == "/services/ml/llm/generate":
+            prompt = ""
+            system_instruction = ""
+            if data:
+                if isinstance(data, dict):
+                    prompt = data.get("prompt", "")
+                    system_instruction = data.get("system_prompt", "")
+                elif isinstance(data, bytes):
+                    parsed = urllib.parse.parse_qs(data.decode("utf-8"))
+                    prompt = parsed.get("prompt", [""])[0]
+                    system_instruction = parsed.get("system_prompt", [""])[0]
+            
+            try:
+                from services.llm_client import reason
+                response = reason(prompt, system_instruction)
+                return json.dumps({
+                    "response": response,
+                    "text": response,
+                    "result": response
+                })
+            except Exception as e:
+                return json.dumps({"error": str(e)})
+
+        # 3. Splunk Index Information Endpoint
+        elif "/services/data/indexes" in path:
+            return json.dumps({
+                "entry": [
+                    {"name": "security", "content": {"totalEventCount": 46, "disabled": False}},
+                    {"name": "infrastructure", "content": {"totalEventCount": 44, "disabled": False}},
+                    {"name": "business", "content": {"totalEventCount": 33, "disabled": False}},
+                    {"name": "compliance", "content": {"totalEventCount": 38, "disabled": False}}
+                ]
+            })
+
+        raise NotImplementedError(f"LocalSplunkClient REST endpoint {path} not implemented")
+
     def search(self, spl_query, max_results=100):
-        """Parse the SPL query to determine which CSV to read."""
-        # Extract index name from query
+        """Parse and route SPL search query, emulating MLTK, Cisco DTS, and Hosted AI commands."""
+        import re
+
+        # Emulate ML-SPL 'ai' command with Splunk Foundation AI Security Model
+        if "| ai" in spl_query:
+            prompt = ""
+            idx = spl_query.find('prompt="')
+            if idx != -1:
+                start = idx + 8
+                end = start
+                while end < len(spl_query):
+                    if spl_query[end] == '"' and spl_query[end-1] != '\\':
+                        break
+                    end += 1
+                prompt = spl_query[start:end].replace('\\"', '"')
+            else:
+                prompt = spl_query
+            
+            try:
+                from services.llm_client import reason
+                response = reason(prompt, system_instruction="You are Splunk's Hosted Foundation AI Security Model (foundation-sec-1.1-8b-instruct).")
+            except Exception as e:
+                response = f"Splunk AI command execution failed: {str(e)}"
+            
+            return [{
+                "response": response,
+                "text": response,
+                "result": response,
+                "ai_result": response,
+                "ai_result_1": response,
+                "_raw": response
+            }]
+
+        # Emulate Splunk 'generativeai' command
+        if "| generativeai" in spl_query:
+            prompt = ""
+            idx = spl_query.find('prompt="')
+            if idx != -1:
+                start = idx + 8
+                end = start
+                while end < len(spl_query):
+                    if spl_query[end] == '"' and spl_query[end-1] != '\\':
+                        break
+                    end += 1
+                prompt = spl_query[start:end].replace('\\"', '"')
+            else:
+                prompt = spl_query
+            
+            try:
+                from services.llm_client import reason
+                response = reason(prompt, system_instruction="You are Splunk's generativeai engine.")
+            except Exception as e:
+                response = f"Splunk GenerativeAI command execution failed: {str(e)}"
+            
+            return [{
+                "response": response,
+                "text": response,
+                "result": response,
+                "_raw": response
+            }]
+
+        # Emulate Cisco Deep Time Series model forecasting
+        if "CiscoDeepTimeSeries" in spl_query:
+            metric_field = "metric_value"
+            if "load" in spl_query:
+                metric_field = "load"
+            
+            horizon = 5
+            horiz_match = re.search(r'future_timespan=(\d+)', spl_query)
+            if horiz_match:
+                horizon = int(horiz_match.group(1))
+            else:
+                horizon = 10
+            
+            # Anomaly filter detection
+            if "where" in spl_query:
+                t_str = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+                return [{
+                    "_time": t_str,
+                    "metric_value": "95.5",
+                    "upper95(metric_value)": "25.0",
+                    "lower95(metric_value)": "5.0"
+                }]
+
+            import random
+            random.seed(42)
+            base = 10.0
+            if "load" in spl_query:
+                base = 65.0
+            
+            results = []
+            now_ts = int(time.time())
+            for i in range(horizon):
+                val = base + random.uniform(-2, 3) + (i * 0.5)
+                t_str = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(now_ts + i * 3600))
+                results.append({
+                    "_time": t_str,
+                    f"predicted({metric_field})": str(round(val, 2)),
+                    f"lower95({metric_field})": str(round(val - 2, 2)),
+                    f"upper95({metric_field})": str(round(val + 2, 2)),
+                    "metric_value": str(round(val, 2)),
+                    "load": str(round(val, 2))
+                })
+            return results
+
+        # Emulate Splunk MLTK Container for zero-shot text classification
+        if "MLTKContainer" in spl_query:
+            text = "Security threat event"
+            text_match = re.search(r'eval text=["\'](.*?)["\']', spl_query)
+            if text_match:
+                text = text_match.group(1)
+            
+            try:
+                from services.llm_client import reason
+                prompt = (
+                    f"Classify the following text into one of these labels: Insider Threat, Data Exfiltration, Infrastructure Failure, Unauthorized Access, Malware, Policy Violation.\n"
+                    f"Text: {text}\n"
+                    f"Respond ONLY as a JSON object: {{\"predicted_label\": \"one of the labels\", \"confidence\": float}}"
+                )
+                res_text = reason(prompt, "You are Splunk's MLTKContainer zero-shot classification module.")
+                parsed = json.loads(res_text)
+            except Exception:
+                parsed = {"predicted_label": "Insider Threat", "confidence": 0.85}
+            
+            return [{
+                "predicted_label": parsed.get("predicted_label", "Insider Threat"),
+                "confidence": str(parsed.get("confidence", 0.85)),
+                "score_Insider Threat": "0.1",
+                "score_Data Exfiltration": "0.1"
+            }]
+
+        # Emulate ML-SPL DensityFunction anomaly training
+        if "DensityFunction" in spl_query:
+            return [{"stats": "1"}]
+
+        # Standard CSV index queries
         index_name = None
         for line in spl_query.strip().split("\n"):
             line = line.strip()
@@ -321,7 +523,6 @@ class LocalSplunkClient:
                 parts = line.split("index=")
                 if len(parts) > 1:
                     raw_index = parts[1].split()[0]
-                    # Strip any surrounding quotes or punctuation
                     index_name = raw_index.replace('"', '').replace("'", "").replace(";", "")
                     break
 

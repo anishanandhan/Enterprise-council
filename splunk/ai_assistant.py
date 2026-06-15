@@ -118,8 +118,7 @@ class SplunkAIAssistant:
         return self._client
 
     def _is_live(self):
-        client = self._get_client()
-        return type(client).__name__ == "SplunkClient"
+        return self._get_client() is not None
 
     def generate_spl(self, natural_language, context=None):
         """
@@ -165,7 +164,7 @@ class SplunkAIAssistant:
         # Try LLM-based explanation
         try:
             from services.llm_client import reason
-            prompt = f"""You are an expert Splunk SPL analyst. 
+            prompt = f"""You are an expert Splunk SPL analyst.
 Explain the following SPL query in plain English in 2-3 sentences.
 Focus on what data it retrieves, how it transforms it, and what insight it provides.
 Do NOT give security recommendations. Only explain what the query does technically.

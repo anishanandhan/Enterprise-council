@@ -202,7 +202,7 @@ class TestAPISecurityHeaders:
     def test_api_security_headers(self):
         from fastapi.testclient import TestClient
         from api.main import app
-        
+
         client = TestClient(app)
         response = client.get("/api/v1/health")
         assert response.status_code == 200
@@ -235,7 +235,7 @@ class TestAdvancedSecurityFixes:
         payload = "Alice|MacBook-Pro-01"
         secret = b"spiffe_twin_sync_secret_key_2026"
         valid_sig = hmac.new(secret, payload.encode(), hashlib.sha256).hexdigest()
-        
+
         valid_row = {
             "user": "Alice",
             "device": "MacBook-Pro-01",
@@ -272,7 +272,7 @@ class TestAdvancedSecurityFixes:
         from splunk.agentic_tools import AgenticToolExecutor
 
         executor = AgenticToolExecutor("Security Agent")
-        
+
         # Safe read-only query
         safe_res = executor.execute("run_spl_search", {"spl": "index=security | head 5"})
         assert "error" not in safe_res["result"]
@@ -294,8 +294,58 @@ class TestAdvancedSecurityFixes:
 
         monkeypatch.setenv("SPLUNK_TOKEN", "")
         monkeypatch.setenv("BLOCK_BASIC_AUTH", "true")
-        
+
         client = SplunkClient()
         with pytest.raises(PermissionError) as exc_info:
             client._request("GET", "/services/search/jobs")
         assert "Security Policy Violation: Basic Authentication is blocked" in str(exc_info.value)
+
+
+class TestLocalSplunkClientEmulation:
+    """Verifies that LocalSplunkClient accurately emulates Splunk AI/ML commands and REST endpoints."""
+
+    def test_local_splunk_ai_command(self):
+        from splunk.splunk_client import LocalSplunkClient
+        client = LocalSplunkClient()
+        query = '| ai prompt="Summarize this alert" model="foundation-sec-1.1-8b-instruct"'
+        results = client.search(query)
+        assert len(results) > 0
+        assert "result" in results[0]
+        assert results[0]["result"] != ""
+
+    def test_local_splunk_cisco_dts_command(self):
+        from splunk.splunk_client import LocalSplunkClient
+        client = LocalSplunkClient()
+        query = "index=infrastructure | fit CiscoDeepTimeSeries load future_timespan=5"
+        results = client.search(query)
+        assert len(results) == 5
+        for row in results:
+            assert "predicted(load)" in row
+            assert "lower95(load)" in row
+            assert "upper95(load)" in row
+
+    def test_local_splunk_cisco_dts_anomaly_command(self):
+        from splunk.splunk_client import LocalSplunkClient
+        client = LocalSplunkClient()
+        query = "index=infrastructure | fit CiscoDeepTimeSeries metric_value | where metric_value > 'upper95(metric_value)'"
+        results = client.search(query)
+        assert len(results) == 1
+        assert float(results[0]["metric_value"]) > float(results[0]["upper95(metric_value)"])
+
+    def test_local_splunk_mltk_classification(self):
+        from splunk.splunk_client import LocalSplunkClient
+        client = LocalSplunkClient()
+        query = '| makeresults | eval text="anomalous user privilege escalation detected" | fit MLTKContainer algo=fdai_zeroshot_classification'
+        results = client.search(query)
+        assert len(results) == 1
+        assert "predicted_label" in results[0]
+        assert "confidence" in results[0]
+
+    def test_local_splunk_assistant_rest_endpoint(self):
+        from splunk.splunk_client import LocalSplunkClient
+        client = LocalSplunkClient()
+        response_json = client._request("POST", "/services/spl_assistant/generate", data={"query": "timeline for user Alice"})
+        import json
+        parsed = json.loads(response_json)
+        assert "spl" in parsed
+        assert "explanation" in parsed

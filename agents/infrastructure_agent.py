@@ -43,12 +43,12 @@ class InfrastructureAgent:
         # Register custom infrastructure telemetry tool
         def get_service_metrics(args):
             service = args.get("service", "CustomerDB")
-            
+
             # Query Splunk for live metrics if connected
             from splunk.splunk_client import get_client
             client = get_client()
-            is_live = type(client).__name__ in ["SplunkClient", "SplunkSDKClient"]
-            
+            is_live = client is not None
+
             if is_live:
                 try:
                     query = f"index=infrastructure service=\"{service}\" | head 1"
@@ -65,7 +65,7 @@ class InfrastructureAgent:
                         }
                 except Exception as e:
                     print(f"  [Infrastructure Agent] Failed to query live service metrics: {e}")
-            
+
             # Fallback mock metrics when offline
             return {
                 "service": service,

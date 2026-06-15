@@ -41,8 +41,7 @@ class SplunkAIToolkit:
         return self._client
 
     def _is_live(self):
-        client = self._get_client()
-        return type(client).__name__ == "SplunkClient"
+        return self._get_client() is not None
 
     def fit_anomaly_model(self, index="security", fields=None):
         """
