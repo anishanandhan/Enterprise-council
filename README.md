@@ -236,7 +236,7 @@ GEMINI_API_KEY=your_gemini_api_key
   ```
 
 ### 4. Connect Your Workspace
-1. Open your browser and navigate to `http://localhost:8502`.
+1. Open your browser.
 2. The landing page loader will redirect you to the Access Gateway portal.
 3. Select one of the pre-filled demo identities (CISO, SOC Analyst, SOC Manager, or Auditor) to authenticate your access scope.
 4. Go to the dashboard and customize user names, incident alerts, and severity levels in the Scenario configuration.
