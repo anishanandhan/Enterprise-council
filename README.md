@@ -42,12 +42,12 @@ Enterprise Council AI is a decision intelligence system built to resolve critica
 *   **Splunk MCP Connectivity**: Agents query Splunk indexes in real-time utilizing the Model Context Protocol.
 *   **Regulatory Alignment**: Provides explainable AI compliance auditing tailored to EU AI Act Article 9-15 specifications.
 
-### 📈 Quantified Impact:
+### Quantified Impact:
 *   **90%+ Latency Reduction**: Cuts critical incident decision-making from hours of manager calls to **under 3 seconds**.
 *   **Zero-Downtime Containment**: Saves **up to $15,000 per minute** in business losses by preventing premature account blocks on DevOps/SREs pushing hotfixes to production.
 *   **100% Audit Readiness**: Automates EU AI Act conformity compliance tracking with cryptographic SHA-256 signatures.
 
-### ⚔️ The Cross-Examination Protocol: Disagreement to Consensus
+### The Cross-Examination Protocol: Disagreement to Consensus
 Unlike simple "voting" systems where independent opinions are just concatenated, Enterprise Council AI agents actively debate and cross-examine each other using real-time Splunk queries:
 1. **Round 1: Opening Statements**: Each agent analyzes the Digital Twin topology and submits their initial risk evaluation.
 2. **Round 2: Cross-Examination & Evidence Gathering**: Each agent identifies the opponent with the most divergent risk posture. The agent then calls a Splunk tool via MCP, generating a target SPL search to find telemetry evidence validating or disproving their opponent's claim (e.g., Security queries the infrastructure log for system dependencies to challenge Business, and Business queries past login metrics to challenge Security).
