@@ -266,6 +266,24 @@ GEMINI_API_KEY=your_gemini_api_key
 
 ![Operational Command Center](docs/dashboard_layout.png)
 
+### 5. Install the Custom Splunk App & Dashboard (Optional)
+To visualize telemetry directly in Splunk Enterprise using our custom dark-themed dashboard:
+1. Symlink or copy the `splunk_app` directory to your Splunk installations `etc/apps/` folder:
+   ```bash
+   ln -s "/path/to/enterprise-council-ai/splunk_app" "/Applications/Splunk/etc/apps/enterprise_council_ai"
+   ```
+2. Ingest the mock datasets into your Splunk instance:
+   ```bash
+   python splunk/ingest_data.py
+   ```
+3. Restart Splunk to load the app and configure default system-level alert actions settings (clearing default allowedDomainList warnings):
+   ```bash
+   /Applications/Splunk/bin/splunk restart
+   ```
+4. Open Splunk Web (`http://localhost:8000`), select **Enterprise Council AI** from the Apps sidebar, and monitor the live dashboards!
+
+![Splunk Operational Command Center](docs/splunk_dashboard.png)
+
 ---
 
 ## Configuration
