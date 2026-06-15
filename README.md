@@ -13,6 +13,22 @@ A multi-agent decision intelligence console translating Splunk security telemetr
 > **The Problem**: Security Operations Centers (SOCs) face thousands of daily alerts, analysts burn out from fatigue, and a single bad containment call (like blocking a lead engineer pushing a hotfix to a gateway) can take down production, costing the company thousands of dollars per minute.
 
 ---
+## Table of Contents
+* [About](#about)
+* [Features](#features)
+* [Tech Stack](#tech-stack)
+* [Architecture](#architecture)
+* [Project Structure](#project-structure)
+* [Getting Started](#getting-started)
+* [Configuration](#configuration)
+* [Security](#security)
+* [How to Contribute?](#how-to-contribute)
+* [What's Next?](#whats-next)
+* [License](#license)
+* [Acknowledgements](#acknowledgements)
+* [Author](#author)
+
+---
 
 ## About
 Enterprise Council AI is a decision intelligence system built to resolve critical security incidents. When an alert triggers, rather than relying on a single AI or hardcoded playbook rules, the platform orchestrates a multi-agent debate where specialized AI agents (Security, Infrastructure, Compliance, Business) deliberate on the best containment actions.
