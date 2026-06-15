@@ -1,7 +1,7 @@
 """
 splunk_tools.py — Splunk MCP Tool Implementations
 
-Registers 14 standard Splunk-specific tools and legacy tools in the MCP registry so agents
+Registers 26 Splunk-specific and AI-powered tools in the MCP registry so agents
 can query live Splunk data through the MCP protocol.
 
 Standard tools registered:
