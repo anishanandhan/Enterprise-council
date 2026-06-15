@@ -362,14 +362,24 @@
                                     </a>
                                 ))}
                             </div>
-                            <a 
-                                href={dashboardUrl} 
-                                target={linkTarget}
-                                className="hidden lg:inline-flex items-center justify-center rounded-full uppercase text-[10px] tracking-widest px-5 py-2 font-semibold text-foreground bg-nav-button hover:bg-nav-button/80 active:scale-[0.97] transition-all border border-white/5"
-                                aria-label="Console Login (opens decision center dashboard)"
-                            >
-                                Console Login
-                            </a>
+                            <div className="hidden lg:flex gap-3">
+                                <a 
+                                    href="https://github.com/anishanandhan/Enterprise-council" 
+                                    target="_blank"
+                                    className="inline-flex items-center justify-center rounded-full uppercase text-[10px] tracking-widest px-5 py-2 font-semibold text-foreground bg-nav-button hover:bg-nav-button/80 active:scale-[0.97] transition-all border border-white/5"
+                                    aria-label="View Source Code on GitHub in a new tab"
+                                >
+                                    Source Code
+                                </a>
+                                <a 
+                                    href={dashboardUrl} 
+                                    target={linkTarget}
+                                    className="inline-flex items-center justify-center rounded-full uppercase text-[10px] tracking-widest px-5 py-2 font-semibold text-primary-foreground bg-primary hover:brightness-110 active:scale-[0.97] transition-all"
+                                    aria-label="Console Login (opens decision center dashboard)"
+                                >
+                                    Console Login
+                                </a>
+                            </div>
                         </nav>
                     ) : (
                         /* Mainframe Fixed Navbar (Branded Enterprise Council AI) */
@@ -402,6 +412,14 @@
 
                             {/* Desktop CTA */}
                             <div className="hidden lg:flex flex-row items-center gap-6 text-[18px] text-black">
+                                <a 
+                                    href="https://github.com/anishanandhan/Enterprise-council" 
+                                    target="_blank"
+                                    className="hover:opacity-60 transition-opacity font-medium"
+                                    aria-label="View Source Code on GitHub in a new tab"
+                                >
+                                    Source Code
+                                </a>
                                 <a 
                                     href={dashboardUrl} 
                                     target={linkTarget} 
@@ -440,6 +458,15 @@
                                     </a>
                                 ))}
                                 <hr className="w-12 border-neutral-300" />
+                                <a 
+                                    href="https://github.com/anishanandhan/Enterprise-council" 
+                                    target="_blank"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="text-xl text-black font-semibold hover:opacity-60 transition-opacity"
+                                    aria-label="View Source Code on GitHub in a new tab"
+                                >
+                                    Source Code
+                                </a>
                                 <a 
                                     href={dashboardUrl} 
                                     target={linkTarget}
@@ -852,7 +879,7 @@
                                     Console Login
                                 </a>
                                 <a 
-                                    href="https://github.com" 
+                                    href="https://github.com/anishanandhan/Enterprise-council" 
                                     target="_blank"
                                     className="bg-transparent text-foreground border border-foreground/30 hover:border-foreground/80 hover:bg-white/5 px-8 py-4 text-xs tracking-wider uppercase font-bold rounded-sm cursor-pointer transition-all active:scale-[0.97]"
                                     aria-label="View Source Code on GitHub in a new tab"
@@ -873,7 +900,7 @@
                                 <p className="mt-1 opacity-60">Splunk Hackathon 2026 &bull; Secure Consensus Decision Intelligence</p>
                             </div>
                             <div className="flex gap-6">
-                                <a href="https://github.com" target="_blank" className="hover:text-foreground transition-colors" aria-label="GitHub Repository in a new tab">GitHub Repository</a>
+                                <a href="https://github.com/anishanandhan/Enterprise-council" target="_blank" className="hover:text-foreground transition-colors" aria-label="GitHub Repository in a new tab">GitHub Repository</a>
                             </div>
                         </div>
                     </footer>
