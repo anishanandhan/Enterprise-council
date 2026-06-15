@@ -1,0 +1,4 @@
+<nav color="#0A0E1A">
+  <view name="enterprise_council_dashboard" default="true" />
+  <view name="search" />
+</nav>

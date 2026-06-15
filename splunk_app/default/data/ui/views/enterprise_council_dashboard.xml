@@ -1,0 +1,56 @@
+<dashboard version="1.1" theme="dark">
+  <label>Enterprise Council AI — Operational Command Center</label>
+  <description>Direct Splunk Telemetry ingested for Multi-Agent Consensus and Digital Twin modeling.</description>
+  <row>
+    <panel>
+      <title>Overall Ingested Log Volume by Category</title>
+      <chart>
+        <search>
+          <query>(index=security OR index=infrastructure OR index=compliance OR index=business) | stats count by index</query>
+          <earliest>0</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Security Alert Ingestion (index=security)</title>
+      <chart>
+        <search>
+          <query>index=security | stats count by event</query>
+          <earliest>0</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Compliance and Policy Risks (index=compliance)</title>
+      <table>
+        <search>
+          <query>index=compliance | table timestamp event policy risk | sort -timestamp</query>
+          <earliest>0</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Infrastructure Deployments &amp; Performance (index=infrastructure)</title>
+      <table>
+        <search>
+          <query>index=infrastructure | table timestamp service event severity status | sort -timestamp</query>
+          <earliest>0</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
