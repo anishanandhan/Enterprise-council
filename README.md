@@ -6,7 +6,7 @@ A multi-agent decision intelligence console translating Splunk security telemetr
 [![License](https://img.shields.io/github/license/anishanandhan/Enterprise-council?style=flat-square&color=emerald)](LICENSE)
 [![Streamlit App](https://img.shields.io/badge/OCC_Console-Live-red?style=flat-square&logo=streamlit)](https://enterprise-council-ai-58611599850.us-central1.run.app/)
 
-**Live Console Demo:** [https://enterprise-council-ai-58611599850.us-central1.run.app/](https://enterprise-council-ai-58611599850.us-central1.run.app/) *(Note: The hosted container may take ~10 seconds to spin up from cold-start if it has gone idle)* | [Firebase Landing Page](https://enterprise-council-ai.web.app) | [Architecture Guide](architecture_diagram.md)
+**Live Console Demo:** [https://enterprise-council-ai-58611599850.us-central1.run.app/](https://enterprise-council-ai-58611599850.us-central1.run.app/) *(Note: The hosted container may take ~10 seconds to spin up from cold-start if it has gone idle)* | [Architecture Guide](architecture_diagram.md)
 
 ---
 
