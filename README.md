@@ -8,8 +8,7 @@ A multi-agent decision intelligence console translating Splunk security telemetr
 [![Firebase Landing Page](https://img.shields.io/badge/Landing_Page-Live_Firebase-blue?style=flat-square&logo=firebase)](https://enterprise-council-ai.web.app)
 [![Tests Status](https://img.shields.io/badge/Tests-106%20Passed-brightgreen?style=flat-square)](tests/)
 [![Coverage](https://img.shields.io/badge/Coverage-96%25-blueviolet?style=flat-square)](tests/)
-**Live OCC Console Demo:** [https://enterprise-council-ai-58611599850.us-central1.run.app/](https://enterprise-council-ai-58611599850.us-central1.run.app/) *(Note: The Cloud Run container may take ~10 seconds to spin up from cold-start if it has gone idle)*  
-**Live Landing Page:** [https://enterprise-council-ai.web.app](https://enterprise-council-ai.web.app)  
+**Live OCC Console Demo:** [https://enterprise-council-ai-58611599850.us-central1.run.app/](https://enterprise-council-ai-58611599850.us-central1.run.app/) *(Note: The Cloud Run container may take ~10 seconds to spin up from cold-start if it has gone idle)*   
 **Architecture Guide:** [Architecture Guide](architecture_diagram.md)
 
 ---
