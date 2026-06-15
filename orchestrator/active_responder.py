@@ -180,8 +180,14 @@ def trigger_servicenow_sir(webhook_url, incident, decision):
 
 # --- Threat Intelligence Enrichment Feed Simulation ---
 
+
 def get_threat_intel_enrichment(user, event, severity):
-    """Simulate threat intelligence enrichment from VirusTotal, AbuseIPDB, and MISP."""
+    """
+    Simulate threat intel enrichment from VT, AbuseIPDB, and MISP.
+    NOTE: This is a simulated enrichment helper used during offline/demo
+    runs to represent how live SOAR playbooks retrieve external threat
+    intelligence.
+    """
     ip_map = {
         "John": "192.168.1.105",
         "Sarah": "185.220.101.43",

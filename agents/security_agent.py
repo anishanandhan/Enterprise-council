@@ -48,10 +48,36 @@ class SecurityAgent:
 
         # Register custom threat intelligence tool
         def get_threat_intel(args):
+            # Query threat reputation data
+            # NOTE: In production, this queries a live threat table.
+            # In fallback mode, this emulates the lookup table using
+            # incident context and returns mock threat telemetry.
+            user_ip_map = {
+                "John": ["198.51.100.45", "198.51.100.50"],
+                "Emily": ["203.0.113.12"],
+                "Sarah": ["192.0.2.101", "192.0.2.102"]
+            }
+            user_ips = user_ip_map.get(user, ["192.0.2.15"])
+
+            if severity == "Critical":
+                reputation = "malicious"
+                feeds = ["ThreatStream_Blocklist", "AlienVault_OTX_IP_Rep"]
+            elif severity == "High":
+                reputation = "suspicious"
+                feeds = ["AlienVault_OTX_IP_Rep"]
+            else:
+                reputation = "clean"
+                feeds = []
+
             return {
-                "reputation": "malicious" if severity == "Critical" else "suspicious",
-                "known_ips": ["192.168.1.50", "10.0.4.12"],
-                "threat_feeds_matched": ["ThreatStream", "AlienVault"]
+                "user": user,
+                "reputation": reputation,
+                "resolved_ips": user_ips,
+                "threat_feeds_matched": feeds,
+                "intelligence_source": (
+                    "Splunk Threat Intelligence Lookup "
+                    "(Emulated Offline Mock Telemetry)"
+                )
             }
 
         executor.register(AgenticTool(
