@@ -21,9 +21,8 @@ COPY . .
 # Ensure startup script is executable
 RUN chmod +x start.sh
 
-# Expose ports (8080 for Streamlit, 8001 for FastAPI)
+# Expose port (8080 for FastAPI REST API service)
 EXPOSE 8080
-EXPOSE 8001
 
 # Execute startup script
 CMD ["./start.sh"]
