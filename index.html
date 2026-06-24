@@ -769,6 +769,7 @@ function Console({ auth, setAuth, setCurrentTab }) {
 
     const [debateRound, setDebateRound] = useState(0);
     const [permissionMessage, setPermissionMessage] = useState("");
+    const [executionNotification, setExecutionNotification] = useState(null);
 
     useEffect(() => {
         if (auth.roleSelector === "Executive View") {
@@ -886,7 +887,13 @@ function Console({ auth, setAuth, setCurrentTab }) {
             return;
         }
         setPermissionMessage("");
-        alert(`Containment playbook dispatched successfully: Executed ${action.toUpperCase()} action.`);
+        setExecutionNotification({
+            action: action.toUpperCase(),
+            message: `Containment playbook dispatched successfully: Executed ${action.toUpperCase()} action.`
+        });
+        setTimeout(() => {
+            setExecutionNotification(null);
+        }, 4000);
     };
 
     const downloadPDF = async () => {
@@ -1708,6 +1715,35 @@ print(result["decision"]["decision"])`}
             <footer className="py-8 px-8 border-t border-white/5 text-center text-xs text-[#64748B] mt-12 bg-[#111827]">
                 &copy; 2026 Enterprise Council AI. All rights reserved. &bull; Splunk Hackathon 2026 &bull; Secure Consensus Decision Intelligence
             </footer>
+
+            {/* Custom Playbook Execution Toast Notification */}
+            <AnimatePresence>
+                {executionNotification && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -50, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        className="fixed top-6 left-1/2 -translate-x-1/2 z-[200] max-w-md w-full px-4"
+                    >
+                        <div className="bg-[#0f172a] border border-[#10B981]/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] rounded-xl p-4 flex items-center gap-3.5 backdrop-blur-md">
+                            <div className="w-9 h-9 rounded-full bg-[#10B981]/10 flex items-center justify-center shrink-0">
+                                <Shield className="text-[#10B981] w-5 h-5" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Playbook Dispatched</h4>
+                                <p className="text-[11px] text-[#94A3B8] mt-0.5 font-medium leading-normal">{executionNotification.message}</p>
+                            </div>
+                            <button 
+                                onClick={() => setExecutionNotification(null)}
+                                className="text-[#64748B] hover:text-white transition-colors p-1"
+                                aria-label="Close notification"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
