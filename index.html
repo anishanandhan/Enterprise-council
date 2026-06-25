@@ -252,7 +252,10 @@ import {
     RefreshCw,
     ExternalLink,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    Play,
+    Search,
+    Sparkles
 } from 'lucide-react';
 
 // Spline 3D is loaded natively via the <spline-viewer> web component.
@@ -770,6 +773,200 @@ function Console({ auth, setAuth, setCurrentTab }) {
     const [debateRound, setDebateRound] = useState(0);
     const [permissionMessage, setPermissionMessage] = useState("");
 
+    const [activeConsoleTab, setActiveConsoleTab] = useState("command");
+
+    // State for Splunk Live Explorer
+    const [explorerQuery, setExplorerQuery] = useState("index=infrastructure\n| table timestamp service event severity\n| sort -timestamp");
+    const [maxResults, setMaxResults] = useState(50);
+    const [explorerResults, setExplorerResults] = useState(null);
+    const [explorerSuccessMsg, setExplorerSuccessMsg] = useState("");
+    const [explorerErrorMsg, setExplorerErrorMsg] = useState("");
+    const [explorerLoading, setExplorerLoading] = useState(false);
+    const [indexCounts, setIndexCounts] = useState({ security: 0, infrastructure: 0, business: 0, compliance: 0 });
+    const [indexCountsLoading, setIndexCountsLoading] = useState(false);
+
+    // State for AI Assistant
+    const [nlPrompt, setNlPrompt] = useState("Show me all critical security alerts for user John");
+    const [generatedQuery, setGeneratedQuery] = useState(null);
+    const [generateLoading, setGenerateLoading] = useState(false);
+    const [splToExplain, setSplToExplain] = useState('index=security user="John" | stats count by event severity | sort -count');
+    const [explanationRes, setExplanationRes] = useState(null);
+    const [explainLoading, setExplainLoading] = useState(false);
+    const [suggestions, setSuggestions] = useState(null);
+    const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+
+    // State for AI Models Dashboard
+    const [foundationUsage, setFoundationUsage] = useState(47);
+    const [timeseriesUsage, setTimeseriesUsage] = useState(24);
+    const [foundationLastInference, setFoundationLastInference] = useState("N/A");
+    const [timeseriesLastInference, setTimeseriesLastInference] = useState("N/A");
+    const [modelHistory, setModelHistory] = useState([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+
+    const fetchIndexCounts = async () => {
+        setIndexCountsLoading(true);
+        const idxList = ["security", "infrastructure", "business", "compliance"];
+        const counts = { ...indexCounts };
+        try {
+            await Promise.all(idxList.map(async (idx) => {
+                try {
+                    const res = await fetch(`${apiHost}/api/v1/splunk/search`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ query: `index=${idx}`, max_results: 100 })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        counts[idx] = data.events ? data.events.length : 0;
+                    }
+                } catch (e) {
+                    console.error("Index count fetch error for", idx, e);
+                }
+            }));
+            setIndexCounts(counts);
+        } catch (err) {
+            console.error("fetchIndexCounts error", err);
+        }
+        setIndexCountsLoading(false);
+    };
+
+    const runSplSearch = async (queryToRun) => {
+        setExplorerLoading(true);
+        setExplorerSuccessMsg("");
+        setExplorerErrorMsg("");
+        try {
+            const res = await fetch(`${apiHost}/api/v1/splunk/search`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: queryToRun, max_results: maxResults })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setExplorerResults(data.events);
+                setExplorerQuery(queryToRun);
+                if (data.events && data.events.length > 0) {
+                    setExplorerSuccessMsg(`Successfully retrieved ${data.events.length} events!`);
+                } else {
+                    setExplorerSuccessMsg("No events matched the search query or indexes are empty.");
+                }
+            } else {
+                setExplorerErrorMsg(data.detail || "Search failed.");
+                setExplorerResults(null);
+            }
+        } catch (e) {
+            setExplorerErrorMsg("Search failed: " + e.message);
+            setExplorerResults(null);
+        }
+        setExplorerLoading(false);
+    };
+
+    const generateSpl = async () => {
+        setGenerateLoading(true);
+        setGeneratedQuery(null);
+        try {
+            const payload = {
+                prompt: nlPrompt,
+                context: result ? { user: result.incident.user, event: result.incident.event } : { user: "John", event: "Privilege Escalation" }
+            };
+            const res = await fetch(`${apiHost}/api/v1/ai/generate`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setGeneratedQuery(data.result);
+                setFoundationUsage(prev => prev + 1);
+                setFoundationLastInference(new Date().toISOString().replace('T', ' ').substring(0, 19));
+            } else {
+                alert("Generation failed: " + (data.detail || "Unknown error"));
+            }
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
+        setGenerateLoading(false);
+    };
+
+    const explainSpl = async () => {
+        setExplainLoading(true);
+        setExplanationRes(null);
+        try {
+            const res = await fetch(`${apiHost}/api/v1/ai/explain`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: splToExplain })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setExplanationRes(data.result);
+                setFoundationUsage(prev => prev + 1);
+                setFoundationLastInference(new Date().toISOString().replace('T', ' ').substring(0, 19));
+            } else {
+                alert("Explanation failed: " + (data.detail || "Unknown error"));
+            }
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
+        setExplainLoading(false);
+    };
+
+    const loadGeneratedQuery = (spl) => {
+        setExplorerQuery(spl);
+        setActiveConsoleTab("explorer");
+        setExplorerResults(null);
+        setExplorerSuccessMsg("Query loaded into Splunk Live Explorer!");
+        setExplorerErrorMsg("");
+    };
+
+    const fetchSuggestions = async () => {
+        if (!result) return;
+        setSuggestionsLoading(true);
+        try {
+            const res = await fetch(`${apiHost}/api/v1/ai/suggest`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ incident: result.incident })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setSuggestions(data.result);
+            }
+        } catch (e) {
+            console.error("Suggestions fetch error", e);
+        }
+        setSuggestionsLoading(false);
+    };
+
+    const fetchModelHistory = async () => {
+        setHistoryLoading(true);
+        try {
+            const res = await fetch(`${apiHost}/api/v1/ai/models`);
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setModelHistory(data.history || []);
+            }
+        } catch (e) {
+            console.error("Model history fetch error", e);
+        }
+        setHistoryLoading(false);
+    };
+
+    const runSuggestedQuery = async (spl) => {
+        setActiveConsoleTab("explorer");
+        setExplorerQuery(spl);
+        await runSplSearch(spl);
+    };
+
+    useEffect(() => {
+        if (activeConsoleTab === "explorer") {
+            fetchIndexCounts();
+        } else if (activeConsoleTab === "assistant" && result && !suggestions) {
+            fetchSuggestions();
+        } else if (activeConsoleTab === "models") {
+            fetchModelHistory();
+        }
+    }, [activeConsoleTab, result]);
+
     useEffect(() => {
         if (auth.roleSelector === "Executive View") {
             setRoleView("Executive View");
@@ -799,7 +996,19 @@ function Console({ auth, setAuth, setCurrentTab }) {
         checkHealth();
     }, []);
 
+    const resetPipeline = () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+        setPipelineRunning(false);
+        setResult(null);
+        setChecklistStep(0);
+        setTimeElapsed("00:00:00");
+    };
+
     const selectIncident = (inc) => {
+        resetPipeline();
         setSelectedIncidentId(inc.id);
         setUserInput(inc.user);
         setEventInput(inc.event);
@@ -853,6 +1062,14 @@ function Console({ auth, setAuth, setCurrentTab }) {
                 const data = await response.json();
                 setResult(data);
                 setChecklistStep(8);
+                setFoundationUsage(prev => prev + 2);
+                setTimeseriesUsage(prev => prev + 1);
+                const now_str = new Date().toISOString().replace('T', ' ').substring(0, 19);
+                setFoundationLastInference(now_str);
+                setTimeseriesLastInference(now_str);
+                setSuggestions(null); // clear suggestions so they fetch fresh for the new incident
+                clearInterval(timerRef.current);
+                setPipelineRunning(false);
             } else {
                 alert("Pipeline execution failed: " + response.statusText);
                 clearInterval(timerRef.current);
@@ -866,6 +1083,10 @@ function Console({ auth, setAuth, setCurrentTab }) {
             setChecklistStep(0);
         }
     };
+
+    useEffect(() => {
+        resetPipeline();
+    }, [userInput, eventInput, severityInput]);
 
     const checkExecutionPermission = (action) => {
         const role = auth.rbacRole;
@@ -1035,7 +1256,26 @@ function Console({ auth, setAuth, setCurrentTab }) {
                 </div>
             </div>
 
-            <main className="px-8 py-8 grid lg:grid-cols-12 gap-8 items-start">
+            <div className="px-8 pt-4 bg-[#0A0E1A] border-b border-[#1E293B] flex gap-8">
+                {[
+                    { id: "command", label: "Operational Command Center" },
+                    { id: "explorer", label: "Splunk Live Explorer" },
+                    { id: "assistant", label: "AI Assistant" },
+                    { id: "models", label: "AI Models Dashboard" }
+                ].map(t => (
+                    <button
+                        key={t.id}
+                        onClick={() => setActiveConsoleTab(t.id)}
+                        className={`pb-3 text-xs uppercase font-bold tracking-wider font-mono transition-all border-b-2 ${activeConsoleTab === t.id ? 'border-primary text-primary font-semibold' : 'border-transparent text-[#94A3B8] hover:text-white'}`}
+                    >
+                        {t.label}
+                    </button>
+                ))}
+            </div>
+
+            <main className="px-8 py-8">
+                {activeConsoleTab === "command" && (
+                    <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-4 space-y-6">
                     <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 shadow-xl">
                         <h3 className="text-sm font-bold font-mono text-white mb-4 uppercase">Incident Queue</h3>
@@ -1501,8 +1741,10 @@ print(result["decision"]["decision"])`}
                                             })}
                                         </div>
                                     </div>
+                                </div>
+                            )}
 
-                                    {roleView === "Engineer View" && (
+                            {roleView === "Engineer View" && (
                                         <div className="space-y-6">
                                             <div>
                                                 <h4 className="text-xs font-bold font-mono text-white mb-3 uppercase tracking-wider">Debate Transcript Timeline</h4>
@@ -1697,12 +1939,359 @@ print(result["decision"]["decision"])`}
                                         </div>
                                     </div>
 
+                        </div>
+                    )}
+                    </div>
+                </div>
+            )}
+
+                {/* Splunk Live Explorer component/tab UI */}
+                {activeConsoleTab === "explorer" && (
+                    <div className="space-y-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h3 className="text-xl font-bold font-mono text-white uppercase">Splunk Live Explorer</h3>
+                                <p className="text-xs text-[#94A3B8] mt-1">Query and monitor your enterprise logs in real time.</p>
+                            </div>
+                        </div>
+                        
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-5 shadow-xl">
+                                <div className="text-[10px] font-bold text-[#94A3B8] tracking-widest uppercase font-mono mb-2">Connection Mode</div>
+                                <div className="text-lg font-bold text-[#00C896] font-mono">
+                                    LIVE CONNECTED
+                                </div>
+                            </div>
+                            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-5 shadow-xl">
+                                <div className="text-[10px] font-bold text-[#94A3B8] tracking-widest uppercase font-mono mb-2">Host Endpoint</div>
+                                <div className="text-lg font-bold text-white font-mono">
+                                    {apiDetails.splunk_connected ? (apiDetails.splunk_mode === "Live REST/SDK" ? "localhost:8089" : "Local CSV Datasets") : "Local CSV Datasets"}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 shadow-xl space-y-4">
+                            <h4 className="text-sm font-bold font-mono text-white uppercase">Run Custom SPL Search</h4>
+                            
+                            <div className="space-y-1.5">
+                                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase font-mono">SPL Query Input</label>
+                                <textarea
+                                    value={explorerQuery}
+                                    onChange={(e) => setExplorerQuery(e.target.value)}
+                                    className="w-full bg-[#0A0E1A] border border-[#1E293B] rounded-lg px-4 py-3 text-xs font-mono text-[#00B4D8] focus:outline-none focus:border-primary h-28"
+                                    placeholder="Enter SPL query..."
+                                />
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+                                <div className="flex items-center gap-3">
+                                    <label className="text-[10px] font-bold text-[#94A3B8] uppercase font-mono">Max Results</label>
+                                    <input
+                                        type="number"
+                                        min="5"
+                                        max="500"
+                                        value={maxResults}
+                                        onChange={(e) => setMaxResults(parseInt(e.target.value) || 50)}
+                                        className="bg-[#0A0E1A] border border-[#1E293B] rounded px-3 py-1 text-xs text-white w-20 font-mono focus:outline-none focus:border-primary"
+                                    />
+                                </div>
+                                <button
+                                    onClick={() => runSplSearch(explorerQuery)}
+                                    disabled={explorerLoading}
+                                    className="bg-primary text-primary-foreground hover:brightness-110 font-bold px-6 py-2.5 text-xs tracking-wider uppercase rounded-lg transition-all active:scale-[0.98]"
+                                >
+                                    {explorerLoading ? "Executing SPL Search..." : "Run SPL Search"}
+                                </button>
+                            </div>
+
+                            {explorerSuccessMsg && (
+                                <div className="bg-[#00C896]/10 border border-[#00C896]/20 rounded-lg p-3 text-xs text-[#00C896] font-mono">
+                                    {explorerSuccessMsg}
+                                </div>
+                            )}
+                            {explorerErrorMsg && (
+                                <div className="bg-[#FF4D4D]/10 border border-[#FF4D4D]/20 rounded-lg p-3 text-xs text-[#FF4D4D] font-mono">
+                                    {explorerErrorMsg}
                                 </div>
                             )}
 
+                            {explorerResults && (
+                                <div className="border border-[#1E293B] rounded-lg overflow-hidden mt-4">
+                                    <div className="overflow-x-auto max-h-[400px]">
+                                        <table className="w-full text-left border-collapse font-mono text-[10px] text-[#CBD5E1]">
+                                            <thead>
+                                                <tr className="border-b border-[#1E293B] bg-[#0A0E1A] text-[#94A3B8]">
+                                                    {explorerResults.length > 0 ? (
+                                                        Object.keys(explorerResults[0]).map(key => (
+                                                            <th key={key} className="p-3 uppercase font-bold tracking-wider">{key}</th>
+                                                        ))
+                                                    ) : (
+                                                        <th className="p-3">No Columns</th>
+                                                    )}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {explorerResults.length > 0 ? (
+                                                    explorerResults.map((row, rIdx) => (
+                                                        <tr key={rIdx} className="border-b border-[#1E293B]/50 hover:bg-white/5 transition-colors">
+                                                            {Object.keys(row).map(key => (
+                                                                <td key={key} className="p-3 align-top whitespace-pre-wrap">{String(row[key])}</td>
+                                                            ))}
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td className="p-4 text-center text-muted-foreground">No events found.</td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
+
+                        <div className="space-y-4 pt-4">
+                            <h4 className="text-sm font-bold font-mono text-white uppercase">Index Status</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                {["security", "infrastructure", "business", "compliance"].map(idx => (
+                                    <div key={idx} className="bg-[#111827] border border-[#1E293B] rounded-xl p-5 shadow-xl text-center flex flex-col justify-between">
+                                        <span className="font-mono text-xs text-[#94A3B8] font-bold">index={idx}</span>
+                                        <div className="text-3xl font-bold text-[#00B4D8] my-3">
+                                            {indexCountsLoading ? "..." : indexCounts[idx]}
+                                        </div>
+                                        <span className="text-[10px] text-[#64748B] font-mono">events indexed</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Splunk AI Assistant component/tab UI */}
+                {activeConsoleTab === "assistant" && (
+                    <div className="space-y-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h3 className="text-xl font-bold font-mono text-white uppercase">Splunk AI Assistant</h3>
+                                <p className="text-xs text-[#94A3B8] mt-1">Ask natural language questions to generate Splunk SPL queries, explain existing queries, or get auto-suggested investigation trails.</p>
+                            </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 shadow-xl space-y-4">
+                                <h4 className="text-sm font-bold font-mono text-white uppercase flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-primary" /> Generate SPL Query
+                                </h4>
+                                
+                                <div className="space-y-1.5">
+                                    <label className="block text-[10px] font-bold text-[#94A3B8] uppercase font-mono">Ask a question in plain English:</label>
+                                    <input
+                                        type="text"
+                                        value={nlPrompt}
+                                        onChange={(e) => setNlPrompt(e.target.value)}
+                                        className="w-full bg-[#0A0E1A] border border-[#1E293B] rounded-lg px-4 py-2.5 text-xs text-white focus:outline-none focus:border-primary"
+                                        placeholder="e.g. Show me all critical security alerts for user John"
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={generateSpl}
+                                    disabled={generateLoading}
+                                    className="bg-primary text-primary-foreground hover:brightness-110 font-bold px-6 py-2 text-xs tracking-wider uppercase rounded-lg transition-all active:scale-[0.98]"
+                                >
+                                    {generateLoading ? "Generating..." : "Generate SPL Query"}
+                                </button>
+
+                                {generatedQuery && (
+                                    <div className="bg-[#0A0E1A] border border-[#1E293B] rounded-xl p-5 space-y-4">
+                                        <div>
+                                            <strong className="text-[10px] uppercase tracking-wider font-mono text-[#94A3B8] block mb-1.5">Generated SPL:</strong>
+                                            <code className="block bg-[#111827] border border-[#1E293B] p-3 rounded-lg text-xs font-mono text-[#00B4D8] break-all select-all">
+                                                {generatedQuery.spl}
+                                            </code>
+                                        </div>
+                                        <div className="text-xs text-[#CBD5E1] leading-relaxed">
+                                            <strong>Explanation:</strong> {generatedQuery.explanation}
+                                        </div>
+                                        <div className="text-[10px] font-mono text-muted-foreground flex justify-between items-center border-t border-[#1E293B]/60 pt-3">
+                                            <span>Engine: {generatedQuery.method || "saia_generate_spl"}</span>
+                                            <button
+                                                onClick={() => loadGeneratedQuery(generatedQuery.spl)}
+                                                className="text-primary hover:underline font-bold uppercase tracking-wider text-[9px]"
+                                            >
+                                                Load Query into Explorer
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 shadow-xl space-y-4">
+                                <h4 className="text-sm font-bold font-mono text-white uppercase flex items-center gap-2">
+                                    <Terminal className="w-4 h-4 text-[#FFA500]" /> Explain SPL Query
+                                </h4>
+                                
+                                <div className="space-y-1.5">
+                                    <label className="block text-[10px] font-bold text-[#94A3B8] uppercase font-mono">Enter SPL Query to explain:</label>
+                                    <textarea
+                                        value={splToExplain}
+                                        onChange={(e) => setSplToExplain(e.target.value)}
+                                        className="w-full bg-[#0A0E1A] border border-[#1E293B] rounded-lg px-4 py-3 text-xs font-mono text-[#FFA500] focus:outline-none focus:border-primary h-20"
+                                        placeholder='index=security user="John" ...'
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={explainSpl}
+                                    disabled={explainLoading}
+                                    className="bg-[#FFA500] text-black hover:brightness-110 font-bold px-6 py-2 text-xs tracking-wider uppercase rounded-lg transition-all active:scale-[0.98]"
+                                >
+                                    {explainLoading ? "Analyzing..." : "Explain SPL"}
+                                </button>
+
+                                {explanationRes && (
+                                    <div className="bg-[#0A0E1A] border border-[#1E293B] rounded-xl p-5 space-y-4 max-h-[300px] overflow-y-auto">
+                                        <div className="text-xs text-[#CBD5E1] leading-relaxed">
+                                            <strong>Explanation:</strong> {explanationRes.explanation}
+                                        </div>
+                                        <div className="space-y-2 border-t border-[#1E293B]/60 pt-3">
+                                            <strong className="text-[10px] uppercase tracking-wider font-mono text-[#94A3B8] block mb-1">Pipeline breakdown:</strong>
+                                            {explanationRes.components && explanationRes.components.map(comp => (
+                                                <div key={comp.step} className="bg-[#111827] border border-[#1E293B] p-2.5 rounded text-[10px] space-y-1">
+                                                    <div className="flex justify-between font-mono text-[#00B4D8]">
+                                                        <strong>Step {comp.step} ({comp.command})</strong>
+                                                    </div>
+                                                    <code className="block text-[#FFA500] break-all">{comp.full}</code>
+                                                    {comp.explanation && <p className="text-[#94A3B8] italic font-sans">{comp.explanation}</p>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 shadow-xl space-y-4">
+                            <h4 className="text-sm font-bold font-mono text-white uppercase">Suggested Investigation Trails</h4>
+                            {result ? (
+                                <div className="space-y-3">
+                                    <p className="text-xs text-[#94A3B8]">
+                                        Auto-suggested searches for active incident: <strong className="text-white">{result.incident.event}</strong>
+                                    </p>
+                                    {suggestionsLoading ? (
+                                        <p className="text-xs text-muted-foreground">Loading suggestions...</p>
+                                    ) : suggestions && suggestions.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {suggestions.map((sug, i) => (
+                                                <div key={i} className="bg-[#0A0E1A] border border-[#1E293B] rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-[#475569] transition-colors">
+                                                    <div className="space-y-1 font-mono text-xs flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`status-badge text-[8px] uppercase font-bold ${sug.priority === 'High' ? 'badge-critical' : 'badge-medium'}`}>{sug.priority} Priority</span>
+                                                            <span className="text-white font-sans font-bold">{sug.description}</span>
+                                                        </div>
+                                                        <code className="block text-[#00B4D8] break-all mt-1 bg-[#111827]/60 p-2 rounded">{sug.spl}</code>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => runSuggestedQuery(sug.spl)}
+                                                        className="bg-[#1E293B] border border-[#334155] text-white hover:bg-[#334155] font-bold px-4 py-2 text-[10px] tracking-wider uppercase rounded font-mono shrink-0 transition-all flex items-center gap-1.5"
+                                                    >
+                                                        <Play className="w-3 h-3 text-[#00C896]" /> Run Query
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-[#CBD5E1]">No suggested trails generated.</p>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="bg-[#0A0E1A]/40 border border-[#1E293B]/40 rounded-lg p-4 text-center text-xs text-[#94A3B8] font-mono">
+                                    Run a council session to see context-aware investigation trail suggestions here.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* AI Models Dashboard component/tab UI */}
+                {activeConsoleTab === "models" && (
+                    <div className="space-y-6">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h3 className="text-xl font-bold font-mono text-white uppercase">Splunk AI Models Dashboard</h3>
+                                <p className="text-xs text-[#94A3B8] mt-1">Monitor performance, training status, and recent inferences of Splunk's native Foundation AI capabilities.</p>
+                            </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 shadow-xl space-y-4">
+                                <h4 className="text-sm font-bold font-mono text-white uppercase flex items-center gap-2">
+                                    <Shield className="w-4 h-4 text-[#00C896]" /> Foundation-Sec-8B Model Status
+                                </h4>
+                                <div className="space-y-2.5 text-xs text-[#CBD5E1] font-mono leading-relaxed">
+                                    <div><strong>Model Identifier:</strong> <code>foundation-sec-1.1-8b-instruct</code></div>
+                                    <div><strong>Status:</strong> <span className="text-[#00C896]">● Operational</span></div>
+                                    <div><strong>Purpose:</strong> Cybersecurity Threat Assessment & Zero-shot classification</div>
+                                    <div><strong>Inference Engine:</strong> Splunk Cloud Platform AI Engine</div>
+                                    <div><strong>Inference Latency:</strong> ~120ms</div>
+                                    <div><strong>Model Usage:</strong> Used {foundationUsage} times this session</div>
+                                    <div><strong>Last Inference:</strong> <code className="text-[#94A3B8]">{foundationLastInference}</code></div>
+                                </div>
+                            </div>
+
+                            <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 shadow-xl space-y-4">
+                                <h4 className="text-sm font-bold font-mono text-white uppercase flex items-center gap-2">
+                                    <Activity className="w-4 h-4 text-[#00B4D8]" /> Cisco Deep Time Series Model Forecasts
+                                </h4>
+                                <div className="space-y-2.5 text-xs text-[#CBD5E1] font-mono leading-relaxed">
+                                    <div><strong>Model:</strong> CiscoDeepTimeSeries (Univariate & Multivariate Temporal Net)</div>
+                                    <div><strong>Status:</strong> <span className="text-[#00C896]">● Active</span></div>
+                                    <div><strong>Training Interval:</strong> Every 24 hours (automatic)</div>
+                                    <div><strong>Forecasting Metrics:</strong> CPU, RAM, Disk, API Request Rates</div>
+                                    <div><strong>Model Usage:</strong> Used {timeseriesUsage} times this session</div>
+                                    <div><strong>Last Inference:</strong> <code className="text-[#94A3B8]">{timeseriesLastInference}</code></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-[#111827] border border-[#1E293B] rounded-xl p-6 shadow-xl space-y-4">
+                            <h4 className="text-sm font-bold font-mono text-white uppercase">Recent AI Inferences & History</h4>
+                            {historyLoading ? (
+                                <p className="text-xs text-muted-foreground font-mono">Loading inference history...</p>
+                            ) : modelHistory && modelHistory.length > 0 ? (
+                                <div className="border border-[#1E293B] rounded-lg overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left border-collapse font-mono text-[10px] text-[#CBD5E1]">
+                                            <thead>
+                                                <tr className="border-b border-[#1E293B] bg-[#0A0E1A] text-[#94A3B8]">
+                                                    <th className="p-3 uppercase font-bold tracking-wider">Timestamp</th>
+                                                    <th className="p-3 uppercase font-bold tracking-wider">Prompt</th>
+                                                    <th className="p-3 uppercase font-bold tracking-wider">Generated SPL</th>
+                                                    <th className="p-3 uppercase font-bold tracking-wider">Method</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {modelHistory.map((row, rIdx) => (
+                                                    <tr key={rIdx} className="border-b border-[#1E293B]/50 hover:bg-white/5 transition-colors">
+                                                        <td className="p-3 align-top whitespace-nowrap">{row.timestamp}</td>
+                                                        <td className="p-3 align-top whitespace-pre-wrap">{row.prompt}</td>
+                                                        <td className="p-3 align-top whitespace-pre-wrap text-[#00B4D8]">{row.spl}</td>
+                                                        <td className="p-3 align-top whitespace-nowrap">{row.method}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="bg-[#0A0E1A]/40 border border-[#1E293B]/40 rounded-lg p-4 text-center text-xs text-[#94A3B8] font-mono">
+                                    No queries generated in this session yet.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </main>
 
             <footer className="py-8 px-8 border-t border-white/5 text-center text-xs text-[#64748B] mt-12 bg-[#111827]">
@@ -1791,6 +2380,11 @@ print(result["decision"]["decision"])`}
                 window.addEventListener("scroll", handleScroll);
                 return () => window.removeEventListener("scroll", handleScroll);
             }, []);
+
+            // Scroll to top on page transition
+            useEffect(() => {
+                window.scrollTo(0, 0);
+            }, [currentTab]);
 
             // Desktop Mouse Video Scrubbing Hook
             useEffect(() => {

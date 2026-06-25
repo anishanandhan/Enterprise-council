@@ -518,7 +518,89 @@ def generate_report_endpoint(request: Request, report_request: ReportRequest):
             }
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PDF report generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
+
+class SearchRequest(BaseModel):
+    query: str
+    max_results: Optional[int] = 50
+
+class GenerateSPLRequest(BaseModel):
+    prompt: str
+    context: Optional[Dict[str, Any]] = None
+
+class ExplainSPLRequest(BaseModel):
+    query: str
+
+class SuggestRequest(BaseModel):
+    incident: Dict[str, Any]
+
+
+@app.post("/api/v1/splunk/search")
+@limiter.limit("30/minute")
+def splunk_search(request: Request, search_req: SearchRequest):
+    """Run a custom SPL query against Splunk."""
+    from splunk.splunk_client import get_client
+    client = get_client()
+    try:
+        events = client.search(search_req.query, max_results=search_req.max_results)
+        return {"success": True, "events": events}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/v1/ai/generate")
+@limiter.limit("20/minute")
+def ai_generate_spl(request: Request, gen_req: GenerateSPLRequest):
+    """Generate an SPL query from a natural language prompt."""
+    from splunk.ai_assistant import get_ai_assistant
+    assistant = get_ai_assistant()
+    try:
+        res = assistant.generate_spl(gen_req.prompt, context=gen_req.context)
+        return {"success": True, "result": res}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/v1/ai/explain")
+@limiter.limit("20/minute")
+def ai_explain_spl(request: Request, exp_req: ExplainSPLRequest):
+    """Explain an SPL query."""
+    from splunk.ai_assistant import get_ai_assistant
+    assistant = get_ai_assistant()
+    try:
+        res = assistant.explain_spl(exp_req.query)
+        return {"success": True, "result": res}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/v1/ai/suggest")
+@limiter.limit("20/minute")
+def ai_suggest_investigation(request: Request, sug_req: SuggestRequest):
+    """Get suggested investigation trails for an incident."""
+    from splunk.ai_assistant import get_ai_assistant
+    assistant = get_ai_assistant()
+    try:
+        res = assistant.suggest_investigation(sug_req.incident)
+        return {"success": True, "result": res}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/v1/ai/models")
+@limiter.limit("20/minute")
+def ai_models_dashboard(request: Request):
+    """Get query generation history and model stats."""
+    from splunk.ai_assistant import get_ai_assistant
+    assistant = get_ai_assistant()
+    try:
+        history = assistant.get_query_history()
+        return {
+            "success": True,
+            "history": history
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 if __name__ == "__main__":
